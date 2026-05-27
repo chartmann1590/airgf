@@ -1,6 +1,6 @@
 ﻿package com.airgf.app.domain.usecase
 
-import com.airgf.app.core.util.ImageStorageUtil
+import com.airgf.app.core.util.ImageCleanup
 import com.airgf.app.domain.repository.ChatRepository
 import com.airgf.app.domain.repository.GfConfigRepository
 import com.airgf.app.domain.repository.ModelRepository
@@ -14,7 +14,7 @@ class ResetEverythingUseCase @Inject constructor(
     private val userRepository: UserRepository,
     private val modelRepository: ModelRepository,
     private val proactiveScheduler: ProactiveMessageScheduler,
-    private val imageStorageUtil: ImageStorageUtil,
+    private val imageStorageUtil: ImageCleanup,
 ) {
     suspend operator fun invoke() {
         val existingModelPath = modelRepository.getModelPath()

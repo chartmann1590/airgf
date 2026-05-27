@@ -1,5 +1,7 @@
 ﻿package com.airgf.app.core.di
 
+import com.airgf.app.core.util.ImageCleanup
+import com.airgf.app.core.util.ImageStorageUtil
 import com.airgf.app.data.repository.ChatRepositoryImpl
 import com.airgf.app.data.repository.GfConfigRepositoryImpl
 import com.airgf.app.data.repository.ImageGenRepositoryImpl
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindImageGenRepository(impl: ImageGenRepositoryImpl): ImageGenRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindImageCleanup(impl: ImageStorageUtil): ImageCleanup
 }

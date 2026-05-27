@@ -11,9 +11,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+interface ImageCleanup {
+    fun cleanupAllImages()
+}
+
 class ImageStorageUtil @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : ImageCleanup {
 
     private val userImagesDir get() = File(context.filesDir, USER_IMAGES_DIR)
     private val generatedImagesDir get() = File(context.filesDir, GENERATED_IMAGES_DIR)
@@ -66,7 +70,7 @@ class ImageStorageUtil @Inject constructor(
 
     fun calculateImageStorageFormatted(): String = FileUtil.formatFileSize(calculateImageStorageBytes())
 
-    fun cleanupAllImages() {
+    override fun cleanupAllImages() {
         cleanupUserImages()
         cleanupGeneratedImages()
     }
