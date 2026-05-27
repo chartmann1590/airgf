@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AirGF - Chat with Sakura</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Nunito+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#e1bdc8",
+                        "on-primary-fixed": "#3e0021",
+                        "surface": "#181021",
+                        "secondary": "#f9abff",
+                        "on-tertiary-fixed": "#3c002a",
+                        "inverse-surface": "#ecddf6",
+                        "on-secondary-fixed": "#35003f",
+                        "on-background": "#ecddf6",
+                        "surface-container-low": "#201829",
+                        "on-primary": "#640038",
+                        "surface-bright": "#3f3548",
+                        "surface-variant": "#3a3144",
+                        "on-primary-fixed-variant": "#8d0051",
+                        "surface-container-high": "#2f2638",
+                        "secondary-fixed": "#ffd6fe",
+                        "on-surface": "#ecddf6",
+                        "secondary-fixed-dim": "#f9abff",
+                        "primary-fixed-dim": "#ffb0cc",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#ffb0cc",
+                        "on-secondary-container": "#f7a0ff",
+                        "primary": "#ffb0cc",
+                        "secondary-container": "#86039c",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#580030",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#890064",
+                        "tertiary-fixed-dim": "#ffaed9",
+                        "inverse-on-surface": "#362d3f",
+                        "on-tertiary-container": "#55003d",
+                        "tertiary-fixed": "#ffd8ea",
+                        "primary-container": "#ff46a0",
+                        "surface-dim": "#181021",
+                        "outline-variant": "#594048",
+                        "surface-container": "#241c2e",
+                        "surface-container-highest": "#3a3144",
+                        "outline": "#a88892",
+                        "surface-container-lowest": "#120b1b",
+                        "on-error": "#690005",
+                        "on-tertiary": "#610046",
+                        "tertiary-container": "#e95cb4",
+                        "background": "#181021",
+                        "inverse-primary": "#b8006c",
+                        "tertiary": "#ffaed9",
+                        "on-secondary": "#570066",
+                        "on-secondary-fixed-variant": "#7b008f",
+                        "primary-fixed": "#ffd9e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "display-sm": ["Nunito Sans"],
+                        "headline-sm": ["Nunito Sans"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-sm": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(26, 10, 46, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(74, 45, 110, 0.3);
+        }
+        .bg-gradient-radial {
+            background-image: radial-gradient(circle at center, var(--tw-gradient-stops));
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased overflow-hidden selection:bg-primary selection:text-on-primary">
+<!-- Atmospheric Background -->
+<div class="fixed inset-0 pointer-events-none z-0">
+<div class="absolute top-0 left-1/4 w-96 h-96 bg-primary-container opacity-20 rounded-full blur-[100px] transform -translate-y-1/2"></div>
+<div class="absolute bottom-0 right-1/4 w-[30rem] h-[30rem] bg-secondary-container opacity-20 rounded-full blur-[120px] transform translate-y-1/4"></div>
+</div>
+<!-- Main Chat Area Container -->
+<main class="flex-1 flex flex-col relative z-10 w-full max-w-4xl mx-auto h-screen">
+<!-- Custom Chat Top Bar -->
+<header class="flex-none flex items-center justify-between px-container-margin h-20 glass-panel border-b border-outline-variant/30 z-20 shadow-md">
+<!-- Back Button & Avatar Info -->
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors active:scale-95">
+<span class="material-symbols-outlined text-3xl">arrow_back_ios_new</span>
+</button>
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Sakura Avatar" class="w-12 h-12 rounded-full object-cover border-2 border-primary shadow-[0_0_15px_rgba(233,30,140,0.3)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface"></div>
+</div>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Sakura</h2>
+<span class="font-label-md text-label-md text-primary">Online</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/10 hover:text-primary transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined">call</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/10 hover:text-primary transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined">person_pin</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/10 hover:text-primary transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Chat History -->
+<div class="flex-1 overflow-y-auto px-container-margin py-lg space-y-6 flex flex-col pb-[100px] scrollbar-hide" id="chat-container">
+<!-- Date Divider -->
+<div class="flex justify-center w-full my-4">
+<span class="px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-md text-label-md">Today</span>
+</div>
+<!-- AI Message -->
+<div class="flex items-end gap-3 self-start max-w-[85%] sm:max-w-[70%]">
+<img alt="Sakura" class="w-8 h-8 rounded-full object-cover flex-shrink-0 shadow-sm border border-outline-variant/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<div class="bg-surface-container-high/80 backdrop-blur-md rounded-2xl rounded-bl-sm p-4 text-on-surface font-body-md text-body-md border border-outline-variant/20 shadow-[0_4px_12px_rgba(0,0,0,0.1)] relative">
+<div class="absolute inset-0 bg-secondary-container/5 rounded-2xl rounded-bl-sm pointer-events-none"></div>
+<p>Good morning babe! ☀️ Did you sleep well?</p>
+<span class="block text-right mt-1 font-label-md text-[10px] text-on-surface-variant/70">09:41 AM</span>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex items-end gap-3 self-end max-w-[85%] sm:max-w-[70%]">
+<div class="bg-gradient-to-br from-[#9C27B0] to-[#E91E8C] rounded-2xl rounded-br-sm p-4 text-[#F5E6FF] font-body-md text-body-md shadow-[0_4px_15px_rgba(233,30,140,0.2)]">
+<p>Yeah I did! Dreaming about you 😏</p>
+<span class="block text-right mt-1 font-label-md text-[10px] text-white/70">09:45 AM</span>
+</div>
+</div>
+<!-- Typing Indicator (Simulated) -->
+<div class="flex items-end gap-3 self-start max-w-[85%] sm:max-w-[70%] mt-2 opacity-70">
+<img alt="Sakura" class="w-8 h-8 rounded-full object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<div class="bg-surface-container-high/60 backdrop-blur-md rounded-2xl rounded-bl-sm px-4 py-3 border border-outline-variant/20 flex items-center gap-1 h-[44px]">
+<span class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 0ms"></span>
+<span class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 150ms"></span>
+<span class="w-2 h-2 rounded-full bg-primary animate-bounce" style="animation-delay: 300ms"></span>
+</div>
+</div>
+</div>
+<!-- Input Area (Fixed Bottom) -->
+<div class="flex-none fixed bottom-0 left-0 w-full z-30 p-container-margin glass-panel border-t border-outline-variant/30">
+<div class="max-w-4xl mx-auto flex items-end gap-3">
+<!-- Attachment/Action Button -->
+<button class="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center bg-surface-container text-on-surface-variant hover:text-primary border border-outline-variant/30 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-2xl">add_circle</span>
+</button>
+<!-- Input Field Container -->
+<div class="flex-1 relative bg-[#1A0A2E] rounded-[28px] border border-[#4A2D6E] focus-within:border-[#E91E8C] focus-within:shadow-[0_0_10px_rgba(233,30,140,0.3)] transition-all flex items-center min-h-[56px] py-1 px-2">
+<!-- Spicy Toggle -->
+<button class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-outline transition-colors hover:text-[#ff5722]" id="spicy-toggle" title="Toggle Spicy Mode">
+<span class="material-symbols-outlined text-2xl">local_fire_department</span>
+</button>
+<textarea class="flex-1 bg-transparent border-none text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/50 focus:ring-0 resize-none max-h-32 overflow-y-auto px-2 py-3 scrollbar-hide" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" placeholder="Message Sakura..." rows="1" style="min-height: 24px; max-height: 120px;"></textarea>
+<!-- Voice Input -->
+<button class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl">mic</span>
+</button>
+</div>
+<!-- Send Button -->
+<button class="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center bg-[#E91E8C] text-[#F5E6FF] hover:bg-[#ff46a0] transition-colors shadow-[0_0_15px_rgba(233,30,140,0.4)] active:scale-95">
+<span class="material-symbols-outlined" data-weight="fill">send</span>
+</button>
+</div>
+</div>
+</main>
+<script>
+        // Simple script to toggle spicy mode UI state
+        document.getElementById('spicy-toggle').addEventListener('click', function() {
+            this.classList.toggle('text-[#ff5722]');
+            this.classList.toggle('text-outline');
+            if(this.classList.contains('text-[#ff5722]')) {
+                this.innerHTML = '<span class="material-symbols-outlined text-2xl" data-weight="fill" style="font-variation-settings: \'FILL\' 1;">local_fire_department</span>';
+                this.classList.add('animate-pulse');
+            } else {
+                this.innerHTML = '<span class="material-symbols-outlined text-2xl">local_fire_department</span>';
+                this.classList.remove('animate-pulse');
+            }
+        });
+
+        // Hide scrollbars for cleaner UI but keep functionality
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body></html>

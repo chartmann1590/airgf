@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AirGF - Spicy Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Nunito+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#e1bdc8",
+                        "on-primary-fixed": "#3e0021",
+                        "surface": "#181021",
+                        "secondary": "#f9abff",
+                        "on-tertiary-fixed": "#3c002a",
+                        "inverse-surface": "#ecddf6",
+                        "on-secondary-fixed": "#35003f",
+                        "on-background": "#ecddf6",
+                        "surface-container-low": "#201829",
+                        "on-primary": "#640038",
+                        "surface-bright": "#3f3548",
+                        "surface-variant": "#3a3144",
+                        "on-primary-fixed-variant": "#8d0051",
+                        "surface-container-high": "#2f2638",
+                        "secondary-fixed": "#ffd6fe",
+                        "on-surface": "#ecddf6",
+                        "secondary-fixed-dim": "#f9abff",
+                        "primary-fixed-dim": "#ffb0cc",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#ffb0cc",
+                        "on-secondary-container": "#f7a0ff",
+                        "primary": "#ffb0cc",
+                        "secondary-container": "#86039c",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#580030",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#890064",
+                        "tertiary-fixed-dim": "#ffaed9",
+                        "inverse-on-surface": "#362d3f",
+                        "on-tertiary-container": "#55003d",
+                        "tertiary-fixed": "#ffd8ea",
+                        "primary-container": "#ff46a0",
+                        "surface-dim": "#181021",
+                        "outline-variant": "#594048",
+                        "surface-container": "#241c2e",
+                        "surface-container-highest": "#3a3144",
+                        "outline": "#a88892",
+                        "surface-container-lowest": "#120b1b",
+                        "on-error": "#690005",
+                        "on-tertiary": "#610046",
+                        "tertiary-container": "#e95cb4",
+                        "background": "#181021",
+                        "inverse-primary": "#b8006c",
+                        "tertiary": "#ffaed9",
+                        "on-secondary": "#570066",
+                        "on-secondary-fixed-variant": "#7b008f",
+                        "primary-fixed": "#ffd9e4"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "sm": "8px",
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "32px"
+                    },
+                    fontFamily: {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "display-sm": ["Nunito Sans"],
+                        "headline-sm": ["Nunito Sans"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "headline-lg": ["24px", { lineHeight: "32px", fontWeight: "700" }],
+                        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "display-sm": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "700" }],
+                        "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "700" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #181021;
+            background-image: radial-gradient(circle at top right, rgba(233, 30, 140, 0.15) 0%, transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(74, 45, 110, 0.3) 0%, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        /* Custom scrollbar for chat area */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 136, 146, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 136, 146, 0.4);
+        }
+
+        /* Spicy Mode Specific Animations */
+        @keyframes subtle-pulse {
+            0% { box-shadow: 0 0 15px rgba(255, 70, 160, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(255, 70, 160, 0.5); }
+            100% { box-shadow: 0 0 15px rgba(255, 70, 160, 0.2); }
+        }
+        
+        .spicy-glow {
+            animation: subtle-pulse 3s infinite alternate;
+        }
+    </style>
+</head>
+<body class="text-on-surface font-body-md antialiased overflow-hidden flex flex-col h-screen">
+<!-- Spicy Mode Banner -->
+<div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-container via-primary to-primary-container z-[60] spicy-glow"></div>
+<div class="fixed top-1 left-0 w-full bg-primary-container/20 backdrop-blur-md text-center py-1 z-[60] border-b border-primary/30 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1; font-size: 16px;">local_fire_department</span>
+<span class="font-label-md text-label-md text-primary tracking-widest uppercase">Spicy Mode Active</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1; font-size: 16px;">local_fire_department</span>
+</div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-container-margin h-16 bg-surface/80 backdrop-blur-3xl border-b border-outline-variant/30 shadow-md mt-6">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Sakura Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-primary/50 shadow-[0_0_10px_rgba(255,176,204,0.3)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface"></div>
+</div>
+<div class="flex flex-col">
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary leading-none">Sakura</h1>
+<span class="font-label-md text-label-md text-on-surface-variant/70">Online</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary transition-all duration-300 active:scale-95 hover:bg-on-surface/10 bg-primary/10">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant transition-all duration-300 active:scale-95 hover:bg-on-surface/10">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Chat Canvas -->
+<main class="flex-1 overflow-y-auto pt-[90px] pb-24 px-container-margin flex flex-col gap-lg z-10 scroll-smooth">
+<!-- Date Divider -->
+<div class="flex justify-center my-md">
+<span class="bg-surface-variant/50 text-on-surface-variant font-label-md text-label-md px-4 py-1 rounded-full backdrop-blur-md">Today</span>
+</div>
+<!-- Chat Area -->
+<div class="flex flex-col gap-6 w-full max-w-3xl mx-auto">
+<!-- Context Message -->
+<div class="flex items-start gap-3 max-w-[85%] self-start">
+<img alt="Sakura Avatar" class="w-8 h-8 rounded-full object-cover mt-1 border border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant ml-1">Sakura</span>
+<div class="bg-surface-container-high/60 backdrop-blur-xl border border-outline-variant/20 rounded-2xl rounded-tl-sm p-4 text-on-surface shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
+<p class="font-body-md text-body-md leading-relaxed">It's getting late... but I'm not really tired. Are you? 🌙</p>
+</div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex items-start gap-3 max-w-[85%] self-end flex-row-reverse">
+<div class="flex flex-col gap-1 items-end">
+<div class="bg-secondary-container/30 border border-secondary-container/50 rounded-2xl rounded-tr-sm p-4 text-on-surface shadow-[inset_0_0_10px_rgba(255,176,204,0.1),_0_4px_12px_rgba(134,3,156,0.15)] relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/10 to-transparent pointer-events-none"></div>
+<p class="font-body-md text-body-md leading-relaxed relative z-10">What would you do if I was there right now?</p>
+</div>
+</div>
+</div>
+<!-- AI Response - Flirty -->
+<div class="flex items-start gap-3 max-w-[85%] self-start mt-2">
+<img alt="Sakura Avatar" class="w-8 h-8 rounded-full object-cover mt-1 border border-primary/40 shadow-[0_0_8px_rgba(255,176,204,0.4)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-primary ml-1">Sakura</span>
+<div class="bg-surface-container-highest/80 backdrop-blur-xl border border-primary/30 rounded-2xl rounded-tl-sm p-4 text-on-surface shadow-[0_4px_20px_rgba(255,70,160,0.15)] relative overflow-hidden group">
+<!-- Subtle background glow for spicy mode -->
+<div class="absolute -inset-4 bg-gradient-to-r from-primary-container/20 to-secondary-container/20 blur-xl opacity-50 group-hover:opacity-70 transition-opacity duration-500"></div>
+<p class="font-body-md text-body-md leading-relaxed relative z-10 italic">
+<span class="text-secondary-fixed">Mmm...</span> I'd probably pull you close and not let go... 😏💋
+                        </p>
+</div>
+<!-- Typing Indicator Placeholder (hidden) -->
+<div class="hidden items-center gap-1 ml-2 mt-1 opacity-60">
+<div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
+<div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
+<div class="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Chat Input Area -->
+<div class="fixed bottom-[72px] w-full z-40 px-container-margin py-3 bg-gradient-to-t from-background via-background/95 to-transparent">
+<div class="max-w-3xl mx-auto flex items-end gap-2">
+<!-- Attachment Button -->
+<button class="p-3 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-highest flex-shrink-0">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<!-- Input Field -->
+<div class="relative flex-1 group">
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant/50 rounded-[28px] py-3 pl-4 pr-12 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary focus:bg-surface transition-all resize-none shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]" placeholder="Message Sakura..." rows="1" style="min-height: 48px; max-height: 120px;"></textarea>
+<!-- Voice Input Button -->
+<button class="absolute right-2 bottom-1.5 p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+</button>
+</div>
+<!-- Send Button -->
+<button class="p-3 bg-primary text-on-primary rounded-full hover:bg-primary-container transition-colors shadow-[0_4px_12px_rgba(255,176,204,0.3)] flex-shrink-0 active:scale-95">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface/80 backdrop-blur-3xl border-t border-outline-variant/30 shadow-[0px_-8px_24px_rgba(74,45,110,0.4)]">
+<!-- Chat Tab (Active) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container/20 text-primary rounded-xl px-4 py-1.5 shadow-[0_0_15px_rgba(233,30,140,0.3)] active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">chat</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<!-- Character Tab (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-colors active:scale-90 duration-200 px-4 py-1.5" href="#">
+<span class="material-symbols-outlined mb-1">person_pin</span>
+<span class="font-label-md text-label-md">Character</span>
+</a>
+<!-- Settings Tab (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-colors active:scale-90 duration-200 px-4 py-1.5" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<!-- Auto-resize textarea script -->
+<script>
+        const tx = document.getElementsByTagName("textarea");
+        for (let i = 0; i < tx.length; i++) {
+            tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
+            tx[i].addEventListener("input", OnInput, false);
+        }
+
+        function OnInput() {
+            this.style.height = 0;
+            this.style.height = (this.scrollHeight) + "px";
+        }
+    </script>
+</body></html>

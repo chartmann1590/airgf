@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AirGF - Girlfriend Customization</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Nunito+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#e1bdc8",
+                        "on-primary-fixed": "#3e0021",
+                        "surface": "#181021",
+                        "secondary": "#f9abff",
+                        "on-tertiary-fixed": "#3c002a",
+                        "inverse-surface": "#ecddf6",
+                        "on-secondary-fixed": "#35003f",
+                        "on-background": "#ecddf6",
+                        "surface-container-low": "#201829",
+                        "on-primary": "#640038",
+                        "surface-bright": "#3f3548",
+                        "surface-variant": "#3a3144",
+                        "on-primary-fixed-variant": "#8d0051",
+                        "surface-container-high": "#2f2638",
+                        "secondary-fixed": "#ffd6fe",
+                        "on-surface": "#ecddf6",
+                        "secondary-fixed-dim": "#f9abff",
+                        "primary-fixed-dim": "#ffb0cc",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#ffb0cc",
+                        "on-secondary-container": "#f7a0ff",
+                        "primary": "#ffb0cc",
+                        "secondary-container": "#86039c",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#580030",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#890064",
+                        "tertiary-fixed-dim": "#ffaed9",
+                        "inverse-on-surface": "#362d3f",
+                        "on-tertiary-container": "#55003d",
+                        "tertiary-fixed": "#ffd8ea",
+                        "primary-container": "#ff46a0",
+                        "surface-dim": "#181021",
+                        "outline-variant": "#594048",
+                        "surface-container": "#241c2e",
+                        "surface-container-highest": "#3a3144",
+                        "outline": "#a88892",
+                        "surface-container-lowest": "#120b1b",
+                        "on-error": "#690005",
+                        "on-tertiary": "#610046",
+                        "tertiary-container": "#e95cb4",
+                        "background": "#181021",
+                        "inverse-primary": "#b8006c",
+                        "tertiary": "#ffaed9",
+                        "on-secondary": "#570066",
+                        "on-secondary-fixed-variant": "#7b008f",
+                        "primary-fixed": "#ffd9e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "display-sm": ["Nunito Sans"],
+                        "headline-sm": ["Nunito Sans"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-sm": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-surface');
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% -20%, rgba(156, 39, 176, 0.15) 0%, transparent 60%);
+        }
+        
+        .glass-panel {
+            background: rgba(24, 16, 33, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(89, 64, 72, 0.3);
+        }
+
+        .selectable-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .selectable-card.selected {
+            border-color: theme('colors.primary');
+            box-shadow: 0 0 15px rgba(233, 30, 140, 0.3);
+            background: linear-gradient(180deg, theme('colors.surface-container'), theme('colors.surface-container-high'));
+        }
+
+        .selectable-card:hover:not(.selected) {
+            border-color: theme('colors.outline-variant');
+            transform: translateY(-2px);
+        }
+
+        .trait-chip {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .trait-chip.selected {
+            background-color: theme('colors.secondary-container');
+            color: theme('colors.on-surface');
+            border-color: theme('colors.secondary-container');
+        }
+
+        .input-glow:focus-within {
+            box-shadow: 0 0 10px rgba(233, 30, 140, 0.2);
+            border-color: theme('colors.primary');
+        }
+    </style>
+</head>
+<body class="pb-[100px]">
+<!-- Top Navigation (Contextual Suppression implies hiding BottomNav, but TopAppBar might still be needed for 'Back' or brand. Since it's a linear flow step 2 of 4, we might just use a simple header. However, instructions say "use the TopAppBar as a guide to create shared components" but also "Suppress if Linear/Transactional". I will create a simplified TopAppBar suitable for a flow.) -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-container-margin h-16 bg-surface/80 backdrop-blur-3xl border-b border-outline-variant/30 shadow-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:bg-on-surface/10 p-2 rounded-full transition-all duration-300 active:scale-95" onclick="history.back()">arrow_back</span>
+<h1 class="font-headline-sm text-headline-sm-mobile md:text-headline-sm text-primary">AirGF</h1>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Step 2 of 4</div>
+</header>
+<main class="flex-grow pt-24 px-container-margin max-w-4xl mx-auto w-full flex flex-col gap-xl">
+<!-- Header Section -->
+<section class="text-center">
+<h2 class="font-display-sm text-display-sm text-on-surface mb-2">Create Your Perfect Girl</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Choose her look, personality &amp; style</p>
+</section>
+<!-- Section A: Her Name -->
+<section class="flex flex-col gap-sm">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider ml-2">Her Name</label>
+<div class="input-glow flex items-center bg-[#1A0A2E] border border-[#4A2D6E] rounded-full px-4 py-3 transition-all duration-300">
+<span class="material-symbols-outlined text-primary mr-3" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<input class="bg-transparent border-none outline-none text-on-surface font-body-md text-body-md w-full placeholder-on-surface-variant/50 focus:ring-0" placeholder="e.g. Luna, Sakura, Chloe..." type="text"/>
+</div>
+</section>
+<!-- Section B: Pick Her Style Grid -->
+<section class="flex flex-col gap-md">
+<div class="flex justify-between items-end ml-2">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Visual Style</label>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-gutter">
+<!-- Anime Cute -->
+<div class="selectable-card selected rounded-xl overflow-hidden bg-surface-container flex flex-col relative group" onclick="selectCard(this, 'style')">
+<div class="aspect-[3/4] relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
+</div>
+<div class="absolute bottom-0 w-full p-3 text-center">
+<span class="font-body-md text-body-md text-on-surface font-medium">Anime Cute</span>
+</div>
+</div>
+<!-- Anime Cool -->
+<div class="selectable-card rounded-xl overflow-hidden bg-surface-container flex flex-col relative group" onclick="selectCard(this, 'style')">
+<div class="aspect-[3/4] relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCK8t5_Stom5A88rMvoCX-djqixUJsNUg1dcU-bHr3BqNNvil75Dvaee_EmN0XOGPplp4Ivq8eVR_pSDS_OjYK2nR4x3H-t4Y-ou6MPoIPrZuLlcfGE0fUoEjrupNJw2lQXEomzWIUk2cAmdbC0liwZnDlEhca_mKOr5mki-uQNnHKabwkSw9IghWvK2jpVi5JyNBj9APfEXQPXYkGOQBYPCg1N8kp7LbZLQPmHSBQ9wNzc0Or7Mqci84EYVnuCejeXF8B_c28IZTKs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
+</div>
+<div class="absolute bottom-0 w-full p-3 text-center">
+<span class="font-body-md text-body-md text-on-surface font-medium">Anime Cool</span>
+</div>
+</div>
+<!-- Realistic Warm -->
+<div class="selectable-card rounded-xl overflow-hidden bg-surface-container flex flex-col relative group" onclick="selectCard(this, 'style')">
+<div class="aspect-[3/4] relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2D5KUPPkQdnwGVxcyz82mQt7LQUJcbdnIBDD5fmnuF7lxJR7Ia2PobBRd0x9IrtKXNZNSn6_YJcG6qei_-mYQcrpQWJkDw2UwocIF84poFIjp-QQbXxUKHKxcN9bhZN5g7EX4RXwOGVPpbe3GOY1D-vF7YPSlBtrxBpoSkXIAJH5N34zRs3mIeXKxpNz9COYQN-wmMpeZXHZOcfVC-DkwBPvhs9ziTXd0X_kTHYU8rwy8MKZ8KEehEdYsEXCzGe5uyo-oHN7emQmE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
+</div>
+<div class="absolute bottom-0 w-full p-3 text-center">
+<span class="font-body-md text-body-md text-on-surface font-medium">Realistic Warm</span>
+</div>
+</div>
+<!-- Realistic Elegant -->
+<div class="selectable-card rounded-xl overflow-hidden bg-surface-container flex flex-col relative group" onclick="selectCard(this, 'style')">
+<div class="aspect-[3/4] relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTNUkIPMBrFAqzfT4aaya9B8nCce5OYMV1LH-eJ65m6BDd2nR98IwNNFDrtl8IrbkAxu5zjEGNY5_HgTqJTBkZJmPIAWw26hKayy3NQ8pp0FZDNzkVbTlCz6pofSsVxjk8J33BNbVARtvqrn8PVJUzQMI46d4u9FHZpJqfO0EcKi0Pn83108ex4rgypfL9nr4U4vWrgH9h_Qsl0QdFgIEjAWrS4QLveSD5hFrljl8rI4FMe1L1wPJqxpu21R5Bi5lgDBv47JLfxc7T"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
+</div>
+<div class="absolute bottom-0 w-full p-3 text-center">
+<span class="font-body-md text-body-md text-on-surface font-medium">Realistic Elegant</span>
+</div>
+</div>
+<!-- Stylized Punk -->
+<div class="selectable-card rounded-xl overflow-hidden bg-surface-container flex flex-col relative group" onclick="selectCard(this, 'style')">
+<div class="aspect-[3/4] relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD69Dhel-t8rPurN8wvPH2yokBNQwwqMVKxdqCUEdKXmJq-OVpC8YbJqU8UinkAFUHFjpbT5bx_YlJji53XsPgNtFX9UfHwTtQ_4hYQoF8O05_faeyxlRE4TSewvxGwpBJQCuja9kbradKkrwufcoWrMwqnWZGYHJmfQ5eGPnOSXj_IUPAxHYvKfty_AuLPTgTXCFUeMoHPRe7cinzTO9_YTMT3UJe330-OseoE_pKU7faYptbUxhH4W6NHs-QoB3bdzg2O8t-JkDen"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
+</div>
+<div class="absolute bottom-0 w-full p-3 text-center">
+<span class="font-body-md text-body-md text-on-surface font-medium">Stylized Punk</span>
+</div>
+</div>
+<!-- Stylized Soft -->
+<div class="selectable-card rounded-xl overflow-hidden bg-surface-container flex flex-col relative group" onclick="selectCard(this, 'style')">
+<div class="aspect-[3/4] relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlFVLnN1WtefI3kwtdRq439A-CcXxzh7P4vZkwPECkJ7_cJLPN1xEa2i_c4IAIe2VP1N_9C5ZJCygenSfkkVPVPoi5dCKctaLew-mGO4-QP5UGaEiOlNRsAXNqzCVtRQqLd8h0JLtLxDIPsMW7aZf8QqrLtiL2xToX3rqaaRb1OEfbMXKsQY4x4cDd__gBIzePxLotcX-h66Fu1Xk2A0Pl2vgeZnCrFyS91lrGLdbu-0X6tkBrAvNEgHp3r4YkvoZh91yeMq0087fS"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
+</div>
+<div class="absolute bottom-0 w-full p-3 text-center">
+<span class="font-body-md text-body-md text-on-surface font-medium">Stylized Soft</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section C: Personality Traits -->
+<section class="flex flex-col gap-sm">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider ml-2">Core Traits (Pick up to 3)</label>
+<div class="flex flex-wrap gap-2">
+<div class="trait-chip selected font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Sweet</div>
+<div class="trait-chip font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Sarcastic</div>
+<div class="trait-chip selected font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Intellectual</div>
+<div class="trait-chip font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Shy</div>
+<div class="trait-chip font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Playful</div>
+<div class="trait-chip font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Protective</div>
+<div class="trait-chip font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Adventurous</div>
+<div class="trait-chip font-body-sm text-body-sm px-4 py-2 rounded-full border border-secondary-container/50 bg-secondary-container/20 text-secondary-fixed" onclick="toggleChip(this)">Creative</div>
+</div>
+</section>
+<!-- Section D: Your Dynamic -->
+<section class="flex flex-col gap-sm mb-lg">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider ml-2">Relationship Dynamic</label>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="selectable-card selected bg-[#2D1B4E] rounded-[16px] p-4 flex items-center gap-4" onclick="selectCard(this, 'dynamic')">
+<div class="bg-surface-container-highest p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">coffee</span>
+</div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold text-on-surface">Casual</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Relaxed, easy-going conversations.</p>
+</div>
+</div>
+<div class="selectable-card bg-[#2D1B4E] rounded-[16px] p-4 flex items-center gap-4" onclick="selectCard(this, 'dynamic')">
+<div class="bg-surface-container-highest p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">favorite</span>
+</div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold text-on-surface">Romantic</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Deep affection and loving exchanges.</p>
+</div>
+</div>
+<div class="selectable-card bg-[#2D1B4E] rounded-[16px] p-4 flex items-center gap-4" onclick="selectCard(this, 'dynamic')">
+<div class="bg-surface-container-highest p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">handshake</span>
+</div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold text-on-surface">Best Friend</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Jokes, support, and shared secrets.</p>
+</div>
+</div>
+<div class="selectable-card bg-[#2D1B4E] rounded-[16px] p-4 flex items-center gap-4" onclick="selectCard(this, 'dynamic')">
+<div class="bg-surface-container-highest p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">local_fire_department</span>
+</div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold text-on-surface">Passionate</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Intense, emotional, and fiery.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Bottom Action (Since it's a linear flow, replacing BottomNavBar with a Sticky CTA) -->
+<div class="fixed bottom-0 w-full glass-panel border-t border-outline-variant/30 p-4 z-50 flex justify-center">
+<button class="bg-[#E91E8C] text-[#F5E6FF] font-headline-sm text-headline-sm-mobile md:text-headline-sm w-full max-w-md py-3 rounded-full shadow-[0px_8px_24px_rgba(74,45,110,0.4)] hover:opacity-90 active:scale-95 transition-all duration-200">
+            Continue
+        </button>
+</div>
+<script>
+        function selectCard(element, group) {
+            // Find all cards in the same conceptual group
+            const container = element.parentElement;
+            const cards = container.querySelectorAll('.selectable-card');
+            
+            cards.forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+        }
+
+        function toggleChip(element) {
+            element.classList.toggle('selected');
+            
+            // Limit to 3 logic could go here
+            const container = element.parentElement;
+            const selectedChips = container.querySelectorAll('.trait-chip.selected');
+            if(selectedChips.length > 3) {
+                 element.classList.remove('selected');
+                 // Optional: add a little shake animation to indicate limit reached
+                 element.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(0)' }
+                 ], { duration: 200 });
+            }
+        }
+    </script>
+</body></html>

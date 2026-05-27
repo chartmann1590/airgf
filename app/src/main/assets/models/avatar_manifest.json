@@ -1,0 +1,142 @@
+[
+  {
+    "template": "ARIADNA",
+    "displayName": "Ariadna",
+    "modelAssetPath": "models/ariadna.glb",
+    "thumbnailAssetPath": "models/thumb_ariadna.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 6632464,
+    "legacyNames": ["ANIME_CUTE", "STYLIZED_SOFT"],
+    "status": "bundled_present"
+  },
+  {
+    "template": "GRACY_LEE",
+    "displayName": "Gracy Lee",
+    "modelAssetPath": "models/gracy_lee.glb",
+    "thumbnailAssetPath": "models/thumb_gracy_lee.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 3291488,
+    "legacyNames": ["REALISTIC_WARM", "REALISTIC_JAPANESE"],
+    "status": "bundled_present"
+  },
+  {
+    "template": "CATWOMAN",
+    "displayName": "Catwoman",
+    "modelAssetPath": "models/catwoman.glb",
+    "thumbnailAssetPath": "models/thumb_catwoman.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 10783560,
+    "legacyNames": ["ANIME_COOL", "STYLIZED_PUNK"],
+    "status": "bundled_present"
+  },
+  {
+    "template": "PRIYA",
+    "displayName": "Priya",
+    "modelAssetPath": "models/indian_woman_in_saree.glb",
+    "thumbnailAssetPath": "models/thumb_priya.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 15361276,
+    "legacyNames": ["REALISTIC_VIETNAMESE"],
+    "status": "bundled_present"
+  },
+  {
+    "template": "ALINA",
+    "displayName": "Alina",
+    "modelAssetPath": "models/alina_ip_realistic_asian_woman_animated.glb",
+    "thumbnailAssetPath": "models/thumb_alina.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 93615484,
+    "legacyNames": ["REALISTIC_ELEGANT", "REALISTIC_FILIPINO"],
+    "status": "bundled_present"
+  },
+  {
+    "template": "NATASHA",
+    "displayName": "Natasha",
+    "modelAssetPath": "models/realistic_woman_walking_animated.glb",
+    "thumbnailAssetPath": "models/thumb_natasha.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 80230388,
+    "legacyNames": [],
+    "status": "bundled_present"
+  },
+  {
+    "template": "RUBY",
+    "displayName": "Ruby",
+    "modelAssetPath": "models/short-hair-red-head-american.glb",
+    "thumbnailAssetPath": "models/thumb_ruby.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 100693496,
+    "legacyNames": ["REALISTIC_AMERICAN"],
+    "status": "bundled_present"
+  },
+  {
+    "template": "SOPHIA",
+    "displayName": "Sophia",
+    "modelAssetPath": "models/sophia_animated_003_-_animated_3d_woman.glb",
+    "thumbnailAssetPath": "models/thumb_sophia.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 13527864,
+    "legacyNames": [],
+    "status": "bundled_present"
+  },
+  {
+    "template": "BEACH_BABE",
+    "displayName": "Beach Babe",
+    "modelAssetPath": "models/bouncy_beach_babe_walking_in_bikini_animated.glb",
+    "thumbnailAssetPath": "models/thumb_beach_babe.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 87894744,
+    "legacyNames": [],
+    "status": "bundled_present"
+  },
+  {
+    "template": "NISHA_OFFICE",
+    "displayName": "Nisha Office",
+    "modelAssetPath": "models/indian_office_woman.glb",
+    "thumbnailAssetPath": "models/thumb_nisha_office.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 16356492,
+    "legacyNames": [],
+    "status": "bundled_present"
+  },
+  {
+    "template": "INDIAN_HOODIE",
+    "displayName": "Indian Hoodie",
+    "modelAssetPath": "models/indian_teenager__woman_in__hoodie.glb",
+    "thumbnailAssetPath": "models/thumb_indian_hoodie.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 21196744,
+    "legacyNames": [],
+    "status": "bundled_present"
+  },
+  {
+    "template": "HAYLEY_SMITH",
+    "displayName": "Hayley Smith",
+    "modelAssetPath": "models/hayley_smith.glb",
+    "thumbnailAssetPath": "models/thumb_hayley_smith.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 9305872,
+    "legacyNames": [],
+    "status": "bundled_present"
+  },
+  {
+    "template": "RUMBA",
+    "displayName": "Rumba",
+    "modelAssetPath": "models/woman_rumba_dancing_-_mulher_dancando_rumba.glb",
+    "thumbnailAssetPath": "models/thumb_rumba.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 3329568,
+    "legacyNames": [],
+    "status": "bundled_present"
+  },
+  {
+    "template": "ELENA",
+    "displayName": "Elena",
+    "modelAssetPath": "models/realistic_female_character__game-ready_3d_model.glb",
+    "thumbnailAssetPath": "models/thumb_elena.webp",
+    "deliveryMode": "BUNDLED",
+    "expectedSizeBytes": 92745428,
+    "legacyNames": [],
+    "status": "bundled_present"
+  }
+]

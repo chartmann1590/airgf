@@ -1,0 +1,27 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.ap_
+*.aab
+output.json
+
+# Android Studio
+*.hprof
+.idea/
+*.keystore
+!debug.keystore
+
+# Gradle
+.gradle/
+build/
+app/build/
+
+# Local config
+local.properties

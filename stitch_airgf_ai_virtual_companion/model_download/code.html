@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Model Download - AirGF</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Nunito+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#e1bdc8",
+                    "on-primary-fixed": "#3e0021",
+                    "surface": "#181021",
+                    "secondary": "#f9abff",
+                    "on-tertiary-fixed": "#3c002a",
+                    "inverse-surface": "#ecddf6",
+                    "on-secondary-fixed": "#35003f",
+                    "on-background": "#ecddf6",
+                    "surface-container-low": "#201829",
+                    "on-primary": "#640038",
+                    "surface-bright": "#3f3548",
+                    "surface-variant": "#3a3144",
+                    "on-primary-fixed-variant": "#8d0051",
+                    "surface-container-high": "#2f2638",
+                    "secondary-fixed": "#ffd6fe",
+                    "on-surface": "#ecddf6",
+                    "secondary-fixed-dim": "#f9abff",
+                    "primary-fixed-dim": "#ffb0cc",
+                    "on-error-container": "#ffdad6",
+                    "surface-tint": "#ffb0cc",
+                    "on-secondary-container": "#f7a0ff",
+                    "primary": "#ffb0cc",
+                    "secondary-container": "#86039c",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#580030",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#890064",
+                    "tertiary-fixed-dim": "#ffaed9",
+                    "inverse-on-surface": "#362d3f",
+                    "on-tertiary-container": "#55003d",
+                    "tertiary-fixed": "#ffd8ea",
+                    "primary-container": "#ff46a0",
+                    "surface-dim": "#181021",
+                    "outline-variant": "#594048",
+                    "surface-container": "#241c2e",
+                    "surface-container-highest": "#3a3144",
+                    "outline": "#a88892",
+                    "surface-container-lowest": "#120b1b",
+                    "on-error": "#690005",
+                    "on-tertiary": "#610046",
+                    "tertiary-container": "#e95cb4",
+                    "background": "#181021",
+                    "inverse-primary": "#b8006c",
+                    "tertiary": "#ffaed9",
+                    "on-secondary": "#570066",
+                    "on-secondary-fixed-variant": "#7b008f",
+                    "primary-fixed": "#ffd9e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "container-margin": "20px",
+                    "gutter": "16px",
+                    "unit": "4px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Nunito Sans"],
+                    "display-lg": ["Nunito Sans"],
+                    "display-sm": ["Nunito Sans"],
+                    "headline-sm": ["Nunito Sans"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-sm": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(233,30,140,0.8) 0%, rgba(233,30,140,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-100px) scale(0); opacity: 0; }
+        }
+
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 70, 160, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 70, 160, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 70, 160, 0); }
+        }
+
+        .glass-panel {
+            background: rgba(24, 16, 33, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(89, 64, 72, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen overflow-hidden flex flex-col items-center justify-center relative">
+<!-- Atmospheric Glows -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-secondary-container/20 rounded-full blur-[100px] pointer-events-none"></div>
+<!-- Particles Container -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden" id="particles"></div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 flex flex-col items-center w-full max-w-md px-container-margin py-xl">
+<!-- Step Indicator -->
+<div class="mb-xl flex flex-col items-center text-center">
+<span class="font-label-md text-label-md text-primary tracking-widest uppercase mb-sm">Step 4 of 4</span>
+<h1 class="font-display-sm text-display-sm text-on-surface">Initializing</h1>
+</div>
+<!-- Progress Ring Container -->
+<div class="relative w-[280px] h-[280px] flex items-center justify-center mb-xl">
+<!-- Glow effect behind ring -->
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-2xl"></div>
+<!-- SVG Progress Ring -->
+<svg class="w-full h-full -rotate-90 relative z-10" viewbox="0 0 120 120">
+<!-- Background track -->
+<circle class="text-surface-variant" cx="60" cy="60" fill="none" r="54" stroke="currentColor" stroke-width="4"></circle>
+<!-- Progress track -->
+<circle class="transition-all duration-1000 ease-out" cx="60" cy="60" fill="none" r="54" stroke="url(#progressGradient)" stroke-dasharray="339.292" stroke-dashoffset="179.824" stroke-linecap="round" stroke-width="6"></circle>
+<defs>
+<lineargradient id="progressGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#ffb0cc"></stop>
+<stop offset="100%" stop-color="#86039c"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Center Content -->
+<div class="absolute inset-0 flex flex-col items-center justify-center z-20 pulse-ring rounded-full">
+<span class="font-display-lg text-display-lg text-on-surface bg-clip-text text-transparent bg-gradient-to-b from-on-surface to-on-surface-variant drop-shadow-lg">47<span class="font-headline-sm text-headline-sm ml-1">%</span></span>
+</div>
+</div>
+<!-- Status Details -->
+<div class="flex flex-col items-center text-center space-y-md mb-xl glass-panel p-lg rounded-xl w-full">
+<h2 class="font-headline-sm text-headline-sm text-on-surface bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Downloading her mind...</h2>
+<div class="flex flex-col items-center space-y-sm">
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-size: 18px;">download</span>
+                    1.2 GB / 2.5 GB • 4.2 MB/s
+                </p>
+<p class="font-body-sm text-body-sm text-outline flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 16px;">schedule</span>
+                    ~5 minutes remaining
+                </p>
+</div>
+</div>
+<!-- Loading Tips Carousel -->
+<div class="h-12 w-full relative overflow-hidden flex items-center justify-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant italic absolute transition-opacity duration-500 text-center w-full" id="tip1">"Generating personality matrices..."</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic absolute opacity-0 transition-opacity duration-500 text-center w-full" id="tip2">"Syncing emotional responses..."</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic absolute opacity-0 transition-opacity duration-500 text-center w-full" id="tip3">"Optimizing memory retrieval..."</p>
+</div>
+<!-- Meet Her Button (Hidden initially) -->
+<button class="hidden mt-xl w-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm py-4 rounded-full shadow-[0_0_20px_rgba(255,70,160,0.4)] transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2" id="meetBtn">
+            Meet Her
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</main>
+<script>
+        // Simple Particle System
+        const particlesContainer = document.getElementById('particles');
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Random properties
+            const size = Math.random() * 10 + 5;
+            const left = Math.random() * 100;
+            const duration = Math.random() * 3 + 2;
+            const delay = Math.random() * 2;
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}%`;
+            particle.style.bottom = '-20px';
+            particle.style.animationDuration = `${duration}s`;
+            particle.style.animationDelay = `${delay}s`;
+            
+            particlesContainer.appendChild(particle);
+            
+            // Cleanup
+            setTimeout(() => {
+                particle.remove();
+            }, (duration + delay) * 1000);
+        }
+
+        setInterval(createParticle, 300);
+
+        // Simple Tip Carousel
+        const tips = ['tip1', 'tip2', 'tip3'];
+        let currentTip = 0;
+
+        setInterval(() => {
+            document.getElementById(tips[currentTip]).classList.add('opacity-0');
+            currentTip = (currentTip + 1) % tips.length;
+            document.getElementById(tips[currentTip]).classList.remove('opacity-0');
+        }, 3000);
+    </script>
+</body></html>

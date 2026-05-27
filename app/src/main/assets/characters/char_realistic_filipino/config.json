@@ -1,0 +1,9 @@
+{
+  "canvasWidth": 848, "canvasHeight": 1264,
+  "faceOffset": { "x": 0, "y": 0 },
+  "eyeOffset": { "x": 215, "y": 348 }, "eyeSize": { "width": 200, "height": 72 },
+  "mouthOffset": { "x": 291, "y": 696 }, "mouthSize": { "width": 96, "height": 64 },
+  "mouthRegion": { "x": 0.38, "y": 0.44, "w": 0.16, "h": 0.04 },
+  "leftEyeRegion": { "x": 0.30, "y": 0.30, "w": 0.14, "h": 0.04 },
+  "rightEyeRegion": { "x": 0.52, "y": 0.30, "w": 0.14, "h": 0.04 }
+}

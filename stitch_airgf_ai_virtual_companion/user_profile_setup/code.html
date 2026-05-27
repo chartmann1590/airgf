@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile Setup - Step 1</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Nunito+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#e1bdc8",
+                        "on-primary-fixed": "#3e0021",
+                        "surface": "#181021",
+                        "secondary": "#f9abff",
+                        "on-tertiary-fixed": "#3c002a",
+                        "inverse-surface": "#ecddf6",
+                        "on-secondary-fixed": "#35003f",
+                        "on-background": "#ecddf6",
+                        "surface-container-low": "#201829",
+                        "on-primary": "#640038",
+                        "surface-bright": "#3f3548",
+                        "surface-variant": "#3a3144",
+                        "on-primary-fixed-variant": "#8d0051",
+                        "surface-container-high": "#2f2638",
+                        "secondary-fixed": "#ffd6fe",
+                        "on-surface": "#ecddf6",
+                        "secondary-fixed-dim": "#f9abff",
+                        "primary-fixed-dim": "#ffb0cc",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#ffb0cc",
+                        "on-secondary-container": "#f7a0ff",
+                        "primary": "#ffb0cc",
+                        "secondary-container": "#86039c",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#580030",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#890064",
+                        "tertiary-fixed-dim": "#ffaed9",
+                        "inverse-on-surface": "#362d3f",
+                        "on-tertiary-container": "#55003d",
+                        "tertiary-fixed": "#ffd8ea",
+                        "primary-container": "#ff46a0",
+                        "surface-dim": "#181021",
+                        "outline-variant": "#594048",
+                        "surface-container": "#241c2e",
+                        "surface-container-highest": "#3a3144",
+                        "outline": "#a88892",
+                        "surface-container-lowest": "#120b1b",
+                        "on-error": "#690005",
+                        "on-tertiary": "#610046",
+                        "tertiary-container": "#e95cb4",
+                        "background": "#181021",
+                        "inverse-primary": "#b8006c",
+                        "tertiary": "#ffaed9",
+                        "on-secondary": "#570066",
+                        "on-secondary-fixed-variant": "#7b008f",
+                        "primary-fixed": "#ffd9e4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "display-sm": ["Nunito Sans"],
+                        "headline-sm": ["Nunito Sans"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-sm": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            background-image: radial-gradient(circle at 50% -20%, rgba(233, 30, 140, 0.15) 0%, transparent 50%),
+                              radial-gradient(circle at 100% 50%, rgba(156, 39, 176, 0.1) 0%, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .glass-panel {
+            background: rgba(24, 16, 33, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(89, 64, 72, 0.3);
+        }
+
+        .input-pill {
+            background-color: #1A0A2E;
+            border: 1px solid #4A2D6E;
+            border-radius: 28px;
+            color: theme('colors.on-surface');
+            transition: all 0.3s ease;
+        }
+
+        .input-pill:focus {
+            outline: none;
+            border-color: #E91E8C;
+            box-shadow: 0 0 15px rgba(233, 30, 140, 0.3);
+        }
+
+        .chip-selectable {
+            background-color: rgba(156, 39, 176, 0.1);
+            border: 1px solid rgba(156, 39, 176, 0.3);
+            color: theme('colors.secondary');
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .chip-selectable.selected {
+            background-color: rgba(156, 39, 176, 0.4);
+            border-color: theme('colors.secondary');
+            box-shadow: 0 0 10px rgba(156, 39, 176, 0.3);
+        }
+
+        .card-selectable {
+            background: linear-gradient(180deg, theme('colors.surface'), #2D1B4E);
+            border: 1px solid rgba(89, 64, 72, 0.3);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .card-selectable.selected {
+            border-color: #E91E8C;
+            box-shadow: 0 0 20px rgba(233, 30, 140, 0.2);
+            background: linear-gradient(180deg, #2D1B4E, rgba(233, 30, 140, 0.2));
+        }
+
+        .btn-primary {
+            background-color: #E91E8C;
+            color: #F5E6FF;
+            box-shadow: 0 8px 24px rgba(233, 30, 140, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(233, 30, 140, 0.4);
+        }
+
+        /* Hide scrollbar for clean aesthetic */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased pb-32">
+<!-- Top Navigation (Transactional intent, suppressed full nav, just back button and progress) -->
+<header class="fixed top-0 w-full z-50 px-container-margin h-16 flex items-center justify-between glass-panel border-b-0 shadow-none">
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-variant/50 text-on-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex items-center gap-2">
+<div class="h-1.5 w-12 bg-primary rounded-full shadow-[0_0_8px_rgba(255,176,204,0.5)]"></div>
+<div class="h-1.5 w-12 bg-surface-variant rounded-full"></div>
+<div class="h-1.5 w-12 bg-surface-variant rounded-full"></div>
+<div class="h-1.5 w-12 bg-surface-variant rounded-full"></div>
+</div>
+<div class="w-10"></div> <!-- Spacer for center alignment -->
+</header>
+<main class="pt-24 px-container-margin max-w-md mx-auto">
+<!-- Header Section -->
+<div class="mb-8 text-center relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary-container/20 rounded-full blur-3xl -z-10"></div>
+<h1 class="font-display-sm text-display-sm text-on-surface mb-2 tracking-tight">Tell me about yourself</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">So I can get to know you better</p>
+</div>
+<!-- Form Content -->
+<div class="space-y-8 relative z-10">
+<!-- Basic Info Row -->
+<div class="flex gap-4">
+<!-- Name Field -->
+<div class="flex-1 space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant ml-4 block">Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary opacity-70" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<input class="input-pill w-full py-3.5 pl-12 pr-4 font-body-md text-body-md placeholder:text-on-surface-variant/50 focus:ring-0 block" placeholder="What should I call you?" type="text"/>
+</div>
+</div>
+<!-- Age Field -->
+<div class="w-24 space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant ml-4 block">Age</label>
+<input class="input-pill w-full py-3.5 px-4 text-center font-body-md text-body-md placeholder:text-on-surface-variant/50 focus:ring-0 block" placeholder="21+" type="number"/>
+</div>
+</div>
+<!-- Interests Grid -->
+<div class="space-y-3">
+<div class="flex justify-between items-center px-2">
+<label class="font-label-md text-label-md text-on-surface-variant block">Interests</label>
+<span class="font-label-md text-label-md text-primary/70">Pick 3 or more</span>
+</div>
+<div class="flex flex-wrap gap-2" id="interests-grid">
+<!-- Javascript will handle toggling class 'selected' -->
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">sports_esports</span> Gaming
+                    </button>
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">headphones</span> Music
+                    </button>
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">movie</span> Movies
+                    </button>
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1 selected">
+<span class="material-symbols-outlined text-[16px]">menu_book</span> Reading
+                    </button>
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">fitness_center</span> Fitness
+                    </button>
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">palette</span> Art
+                    </button>
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1 selected">
+<span class="material-symbols-outlined text-[16px]">flight</span> Travel
+                    </button>
+<button class="chip-selectable rounded-full px-4 py-2 font-body-sm text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">restaurant</span> Food
+                    </button>
+</div>
+</div>
+<!-- Communication Style -->
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant ml-2 block">Communication style</label>
+<div class="flex flex-col gap-3" id="comm-style-cards">
+<div class="card-selectable rounded-[16px] p-4 flex items-center gap-4 selected" tabindex="0">
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">coffee</span>
+</div>
+<div class="flex-1">
+<h3 class="font-body-md text-body-md font-semibold text-on-surface">Keep it casual</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant/70">Lighthearted chats, everyday updates.</p>
+</div>
+<span class="material-symbols-outlined text-primary opacity-100 transition-opacity check-icon">check_circle</span>
+</div>
+<div class="card-selectable rounded-[16px] p-4 flex items-center gap-4" tabindex="0">
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<div class="flex-1">
+<h3 class="font-body-md text-body-md font-semibold text-on-surface">Go deep</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant/70">Philosophical talks, emotional connection.</p>
+</div>
+<span class="material-symbols-outlined text-primary opacity-0 transition-opacity check-icon">check_circle</span>
+</div>
+<div class="card-selectable rounded-[16px] p-4 flex items-center gap-4" tabindex="0">
+<div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">sentiment_very_satisfied</span>
+</div>
+<div class="flex-1">
+<h3 class="font-body-md text-body-md font-semibold text-on-surface">Make me laugh</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant/70">Banter, jokes, and playful teasing.</p>
+</div>
+<span class="material-symbols-outlined text-primary opacity-0 transition-opacity check-icon">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Action -->
+<div class="fixed bottom-0 left-0 w-full p-container-margin glass-panel border-t border-outline-variant/30 z-50">
+<div class="max-w-md mx-auto">
+<button class="btn-primary w-full py-4 rounded-full font-headline-sm text-headline-sm flex items-center justify-center gap-2">
+                Continue
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<script>
+        // Simple JS for micro-interactions
+        document.addEventListener('DOMContentLoaded', () => {
+            // Chip selection
+            const chips = document.querySelectorAll('#interests-grid .chip-selectable');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    chip.classList.toggle('selected');
+                });
+            });
+
+            // Card selection (single select)
+            const cards = document.querySelectorAll('#comm-style-cards .card-selectable');
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Remove selected from all
+                    cards.forEach(c => {
+                        c.classList.remove('selected');
+                        c.querySelector('.check-icon').classList.replace('opacity-100', 'opacity-0');
+                    });
+                    // Add to clicked
+                    card.classList.add('selected');
+                    card.querySelector('.check-icon').classList.replace('opacity-0', 'opacity-100');
+                });
+            });
+        });
+    </script>
+</body></html>

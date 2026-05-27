@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AirGF - Meeting Sakura</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Nunito+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#e1bdc8",
+                    "on-primary-fixed": "#3e0021",
+                    "surface": "#181021",
+                    "secondary": "#f9abff",
+                    "on-tertiary-fixed": "#3c002a",
+                    "inverse-surface": "#ecddf6",
+                    "on-secondary-fixed": "#35003f",
+                    "on-background": "#ecddf6",
+                    "surface-container-low": "#201829",
+                    "on-primary": "#640038",
+                    "surface-bright": "#3f3548",
+                    "surface-variant": "#3a3144",
+                    "on-primary-fixed-variant": "#8d0051",
+                    "surface-container-high": "#2f2638",
+                    "secondary-fixed": "#ffd6fe",
+                    "on-surface": "#ecddf6",
+                    "secondary-fixed-dim": "#f9abff",
+                    "primary-fixed-dim": "#ffb0cc",
+                    "on-error-container": "#ffdad6",
+                    "surface-tint": "#ffb0cc",
+                    "on-secondary-container": "#f7a0ff",
+                    "primary": "#ffb0cc",
+                    "secondary-container": "#86039c",
+                    "error": "#ffb4ab",
+                    "on-primary-container": "#580030",
+                    "error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#890064",
+                    "tertiary-fixed-dim": "#ffaed9",
+                    "inverse-on-surface": "#362d3f",
+                    "on-tertiary-container": "#55003d",
+                    "tertiary-fixed": "#ffd8ea",
+                    "primary-container": "#ff46a0",
+                    "surface-dim": "#181021",
+                    "outline-variant": "#594048",
+                    "surface-container": "#241c2e",
+                    "surface-container-highest": "#3a3144",
+                    "outline": "#a88892",
+                    "surface-container-lowest": "#120b1b",
+                    "on-error": "#690005",
+                    "on-tertiary": "#610046",
+                    "tertiary-container": "#e95cb4",
+                    "background": "#181021",
+                    "inverse-primary": "#b8006c",
+                    "tertiary": "#ffaed9",
+                    "on-secondary": "#570066",
+                    "on-secondary-fixed-variant": "#7b008f",
+                    "primary-fixed": "#ffd9e4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "container-margin": "20px",
+                    "gutter": "16px",
+                    "unit": "4px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "xl": "32px"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Nunito Sans"],
+                    "display-lg": ["Nunito Sans"],
+                    "display-sm": ["Nunito Sans"],
+                    "headline-sm": ["Nunito Sans"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                    "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                    "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "display-sm": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                    "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .sparkle {
+            position: absolute;
+            background-color: var(--tw-colors-primary);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: float-up linear infinite;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+        .text-glow {
+            text-shadow: 0 0 15px var(--tw-colors-primary-container);
+        }
+        .bg-pulse-glow {
+            animation: custom-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes custom-pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(233, 92, 180, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(233, 92, 180, 0.8); }
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden font-body-md text-on-surface antialiased">
+<!-- Atmospheric Background Glows -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<!-- Center Pink Radial Glow -->
+<div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] md:w-[80vw] md:h-[80vw] bg-primary-container/20 rounded-full blur-[120px]"></div>
+<!-- Bottom Deep Purple Glow -->
+<div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-secondary-container/30 to-transparent"></div>
+</div>
+<!-- Sparkles Container -->
+<div class="absolute inset-0 pointer-events-none z-0" id="sparkles-container"></div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 w-full max-w-md px-container-margin flex flex-col items-center justify-center h-full min-h-[100svh] py-12">
+<!-- Character Focus Area -->
+<div class="flex flex-col items-center flex-grow justify-center w-full mt-8">
+<!-- Character Image -->
+<div class="relative w-64 h-80 md:w-80 md:h-[400px] mb-8 rounded-[32px] p-1 bg-gradient-to-b from-surface-variant/50 to-surface-container-lowest shadow-[0_16px_40px_rgba(74,45,110,0.6)]">
+<div class="w-full h-full overflow-hidden rounded-[28px] relative group">
+<img alt="Anime Cute Character Sakura" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<!-- Subtle inner vignette -->
+<div class="absolute inset-0 shadow-[inset_0_0_30px_rgba(24,16,33,0.5)] rounded-[28px] pointer-events-none"></div>
+</div>
+</div>
+<!-- Identity -->
+<h1 class="font-display-sm text-display-sm md:font-display-lg md:text-display-lg text-primary mb-6 tracking-tight text-glow">
+                Sakura
+            </h1>
+<!-- Glassmorphic Speech Bubble -->
+<div class="relative w-full bg-surface/10 backdrop-blur-[24px] border border-outline-variant/40 rounded-[24px] p-6 mb-12 shadow-[0_8px_32px_rgba(74,45,110,0.5)] transform transition-all hover:bg-surface/15">
+<!-- Pointer Triagnle -->
+<div class="absolute -top-[10px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-outline-variant/40"></div>
+<div class="absolute -top-[8px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-[#2a1c3b]/80 z-10"></div>
+<p class="font-body-lg text-body-lg text-inverse-surface text-center leading-relaxed">
+                    Hey [User]! I've been waiting to meet you... <span class="text-tertiary-container text-xl animate-pulse inline-block">💕</span>
+</p>
+</div>
+</div>
+<!-- Action Area -->
+<div class="w-full mt-auto mb-4">
+<button class="w-full bg-tertiary-container text-on-surface font-headline-sm text-headline-sm py-4 rounded-full flex items-center justify-center gap-3 bg-pulse-glow transition-all duration-300 active:scale-[0.98] hover:bg-tertiary relative overflow-hidden group border border-tertiary/50">
+<!-- Button Inner Glow -->
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-surface/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+<span>Start Chatting</span>
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">
+                    send
+                </span>
+</button>
+</div>
+</main>
+<!-- Micro-interaction JS -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('sparkles-container');
+            const numSparkles = 25;
+
+            for (let i = 0; i < numSparkles; i++) {
+                createSparkle(container);
+            }
+        });
+
+        function createSparkle(container) {
+            const sparkle = document.createElement('div');
+            sparkle.classList.add('sparkle');
+            
+            // Random properties
+            const size = Math.random() * 4 + 2; // 2px to 6px
+            const left = Math.random() * 100; // 0% to 100% width
+            const animationDuration = Math.random() * 5 + 3; // 3s to 8s
+            const animationDelay = Math.random() * 5; // 0s to 5s delay
+
+            sparkle.style.width = `${size}px`;
+            sparkle.style.height = `${size}px`;
+            sparkle.style.left = `${left}%`;
+            sparkle.style.bottom = `-10px`;
+            sparkle.style.animationDuration = `${animationDuration}s`;
+            sparkle.style.animationDelay = `${animationDelay}s`;
+
+            // Optional: slight color variation
+            if(Math.random() > 0.5) {
+                sparkle.style.backgroundColor = 'var(--tw-colors-secondary)';
+            }
+
+            container.appendChild(sparkle);
+            
+            // Re-create after animation ends to keep it infinite but organic
+            setTimeout(() => {
+                sparkle.remove();
+                createSparkle(container);
+            }, (animationDuration + animationDelay) * 1000);
+        }
+    </script>
+</body></html>

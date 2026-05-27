@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AirGF - Reset Confirmation</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#e1bdc8",
+                      "on-primary-fixed": "#3e0021",
+                      "surface": "#181021",
+                      "secondary": "#f9abff",
+                      "on-tertiary-fixed": "#3c002a",
+                      "inverse-surface": "#ecddf6",
+                      "on-secondary-fixed": "#35003f",
+                      "on-background": "#ecddf6",
+                      "surface-container-low": "#201829",
+                      "on-primary": "#640038",
+                      "surface-bright": "#3f3548",
+                      "surface-variant": "#3a3144",
+                      "on-primary-fixed-variant": "#8d0051",
+                      "surface-container-high": "#2f2638",
+                      "secondary-fixed": "#ffd6fe",
+                      "on-surface": "#ecddf6",
+                      "secondary-fixed-dim": "#f9abff",
+                      "primary-fixed-dim": "#ffb0cc",
+                      "on-error-container": "#ffdad6",
+                      "surface-tint": "#ffb0cc",
+                      "on-secondary-container": "#f7a0ff",
+                      "primary": "#ffb0cc",
+                      "secondary-container": "#86039c",
+                      "error": "#ffb4ab",
+                      "on-primary-container": "#580030",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#890064",
+                      "tertiary-fixed-dim": "#ffaed9",
+                      "inverse-on-surface": "#362d3f",
+                      "on-tertiary-container": "#55003d",
+                      "tertiary-fixed": "#ffd8ea",
+                      "primary-container": "#ff46a0",
+                      "surface-dim": "#181021",
+                      "outline-variant": "#594048",
+                      "surface-container": "#241c2e",
+                      "surface-container-highest": "#3a3144",
+                      "outline": "#a88892",
+                      "surface-container-lowest": "#120b1b",
+                      "on-error": "#690005",
+                      "on-tertiary": "#610046",
+                      "tertiary-container": "#e95cb4",
+                      "background": "#181021",
+                      "inverse-primary": "#b8006c",
+                      "tertiary": "#ffaed9",
+                      "on-secondary": "#570066",
+                      "on-secondary-fixed-variant": "#7b008f",
+                      "primary-fixed": "#ffd9e4",
+                      "coral": "#FF5252"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "20dp": "1.25rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "container-margin": "20px",
+                      "gutter": "16px",
+                      "unit": "4px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "md": "16px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Nunito Sans"
+                      ],
+                      "display-lg": [
+                              "Nunito Sans"
+                      ],
+                      "display-sm": [
+                              "Nunito Sans"
+                      ],
+                      "headline-sm": [
+                              "Nunito Sans"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-sm": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .bg-card-surface {
+            background-color: #1A0A2E;
+        }
+        .glow-warning {
+            box-shadow: 0 0 30px rgba(255, 82, 82, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen flex items-center justify-center relative overflow-hidden">
+<!-- Background atmospheric glow to simulate the app underneath -->
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-secondary-container/20 via-background to-background pointer-events-none"></div>
+<!-- Modal Overlay Backdrop (Frosted Glass) -->
+<div class="fixed inset-0 bg-background/80 backdrop-blur-md z-40 transition-opacity duration-300"></div>
+<!-- Modal Content -->
+<div class="relative z-50 w-full max-w-[90%] md:max-w-md mx-auto px-container-margin">
+<div class="bg-card-surface rounded-20dp p-lg shadow-[0px_8px_24px_rgba(74,45,110,0.4)] border border-outline-variant/30 glow-warning flex flex-col items-center text-center transform transition-all duration-300 scale-100 opacity-100">
+<!-- Icon -->
+<div class="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-coral text-4xl" data-icon="warning" style="font-variation-settings: 'FILL' 1;">
+                    warning
+                </span>
+</div>
+<!-- Heading -->
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-sm">
+                Reset Everything?
+            </h2>
+<!-- Body Text -->
+<p class="font-body-md text-body-md text-on-surface-variant mb-xl px-2">
+                This will delete all your conversations, her personality, and all customizations. She'll be gone forever. Are you sure?
+            </p>
+<!-- Actions -->
+<div class="w-full flex flex-col md:flex-row gap-gutter">
+<!-- Cancel Button (Outlined) -->
+<button class="flex-1 py-3 px-6 rounded-full border border-secondary-container text-on-surface font-label-md text-label-md bg-transparent hover:bg-secondary-container/10 transition-colors active:scale-95">
+                    Cancel
+                </button>
+<!-- Reset Button (Solid Coral) -->
+<button class="flex-1 py-3 px-6 rounded-full bg-coral text-white font-label-md text-label-md shadow-lg hover:bg-coral/90 transition-colors active:scale-95">
+                    Reset
+                </button>
+</div>
+</div>
+</div>
+</body></html>

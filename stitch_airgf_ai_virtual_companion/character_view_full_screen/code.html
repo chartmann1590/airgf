@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Character View - AirGF</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Nunito+Sans:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#e1bdc8",
+                        "on-primary-fixed": "#3e0021",
+                        "surface": "#181021",
+                        "secondary": "#f9abff",
+                        "on-tertiary-fixed": "#3c002a",
+                        "inverse-surface": "#ecddf6",
+                        "on-secondary-fixed": "#35003f",
+                        "on-background": "#ecddf6",
+                        "surface-container-low": "#201829",
+                        "on-primary": "#640038",
+                        "surface-bright": "#3f3548",
+                        "surface-variant": "#3a3144",
+                        "on-primary-fixed-variant": "#8d0051",
+                        "surface-container-high": "#2f2638",
+                        "secondary-fixed": "#ffd6fe",
+                        "on-surface": "#ecddf6",
+                        "secondary-fixed-dim": "#f9abff",
+                        "primary-fixed-dim": "#ffb0cc",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#ffb0cc",
+                        "on-secondary-container": "#f7a0ff",
+                        "primary": "#ffb0cc",
+                        "secondary-container": "#86039c",
+                        "error": "#ffb4ab",
+                        "on-primary-container": "#580030",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#890064",
+                        "tertiary-fixed-dim": "#ffaed9",
+                        "inverse-on-surface": "#362d3f",
+                        "on-tertiary-container": "#55003d",
+                        "tertiary-fixed": "#ffd8ea",
+                        "primary-container": "#ff46a0",
+                        "surface-dim": "#181021",
+                        "outline-variant": "#594048",
+                        "surface-container": "#241c2e",
+                        "surface-container-highest": "#3a3144",
+                        "outline": "#a88892",
+                        "surface-container-lowest": "#120b1b",
+                        "on-error": "#690005",
+                        "on-tertiary": "#610046",
+                        "tertiary-container": "#e95cb4",
+                        "background": "#181021",
+                        "inverse-primary": "#b8006c",
+                        "tertiary": "#ffaed9",
+                        "on-secondary": "#570066",
+                        "on-secondary-fixed-variant": "#7b008f",
+                        "primary-fixed": "#ffd9e4"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        sm: "8px",
+                        "container-margin": "20px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "32px"
+                    },
+                    fontFamily: {
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "display-sm": ["Nunito Sans"],
+                        "headline-sm": ["Nunito Sans"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "500" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "headline-lg": ["24px", { lineHeight: "32px", fontWeight: "700" }],
+                        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "display-sm": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "700" }],
+                        "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "700" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pulse-glow {
+            animation: pulse-glow 3s infinite alternate ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px 5px rgba(233, 30, 140, 0.1); transform: scale(0.98); }
+            100% { box-shadow: 0 0 50px 15px rgba(233, 30, 140, 0.3); transform: scale(1.02); }
+        }
+        .waveform-bar {
+            animation: bounce 1s infinite alternate ease-in-out;
+        }
+        .waveform-bar:nth-child(1) { animation-delay: 0.1s; }
+        .waveform-bar:nth-child(2) { animation-delay: 0.3s; }
+        .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+        .waveform-bar:nth-child(4) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0% { transform: scaleY(0.5); }
+            100% { transform: scaleY(1.5); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen overflow-hidden flex flex-col relative">
+<!-- Top AppBar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-container-margin h-16 bg-surface/80 backdrop-blur-3xl border-b border-outline-variant/30 shadow-md transition-all duration-300">
+<div class="flex items-center gap-md cursor-pointer hover:bg-on-surface/10 rounded-full p-2 transition-colors">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container relative">
+<img alt="AI Girlfriend Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+</div>
+<span class="font-headline-sm text-primary">AirGF</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-on-surface/10 text-primary transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 relative mt-16 pb-20 flex flex-col items-center justify-start bg-gradient-to-b from-background via-surface to-[#2D1B4E]">
+<!-- Large Character Image with Radial Glow -->
+<div class="relative w-full max-w-[400px] aspect-[3/4] mt-lg flex-shrink-0 flex flex-col items-center justify-center">
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-[100px] -z-10 pulse-glow mix-blend-screen"></div>
+<img alt="Sakura Full Character View" class="w-full h-full object-contain rounded-3xl z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBalALnbJBtnMwmE052C4FPeSClb5MGZ1NuPwrSQpXiVypsHQmzMtQX5ETgpBmX5bJWLqjNv1P26O1nFjujLUPZYkcs5ayZ-iXIg9mDT-hch5Wb2qloCHSCdvZN3goAoJ4ZiSOPCWkYoqM2mKL27J5ySuW6fCpWMAa8g5TKIB4WOjbCxMJ0VeVYL4VcU1vGSeJ7z7GN5n4zx83GiWQpfP6i0vMuLanOgrjRUmRPN5VMsWUMhBDx_HGo_B4sIriiKoSEatzfHfSjetTw"/>
+<!-- Animated Waveform (simulating speech/listening) -->
+<div class="absolute bottom-10 flex gap-1 items-end h-8 z-20">
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-1/3"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-2/3"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-full"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-1/2"></div>
+</div>
+</div>
+<!-- Interactive Overlay & Actions -->
+<div class="w-full px-container-margin mt-auto flex flex-col items-center gap-xl pb-xl z-20">
+<!-- Mood Indicator -->
+<div class="bg-surface-container/50 backdrop-blur-xl border border-secondary/30 rounded-full px-lg py-sm flex items-center gap-2 text-on-surface font-body-sm shadow-[0px_8px_24px_rgba(74,45,110,0.4)]">
+<span class="text-xl">😊</span>
+<span>Feeling happy</span>
+</div>
+<!-- Quick Action Icons -->
+<div class="flex gap-lg">
+<button class="w-14 h-14 rounded-full bg-[#9C27B0]/20 border border-[#9C27B0] backdrop-blur-md flex items-center justify-center text-secondary shadow-[0_0_15px_rgba(233,30,140,0.2)] hover:bg-[#9C27B0]/40 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[28px]" data-icon="chat" data-weight="fill" style="font-variation-settings: 'FILL' 1;">chat</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-[#9C27B0]/20 border border-[#9C27B0] backdrop-blur-md flex items-center justify-center text-primary-container shadow-[0_0_15px_rgba(233,30,140,0.2)] hover:bg-[#9C27B0]/40 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[28px]" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-[#9C27B0]/20 border border-[#9C27B0] backdrop-blur-md flex items-center justify-center text-tertiary-container shadow-[0_0_15px_rgba(233,30,140,0.2)] hover:bg-[#9C27B0]/40 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[28px]" data-icon="help">help</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-[#9C27B0]/20 border border-[#9C27B0] backdrop-blur-md flex items-center justify-center text-[#ff6b6b] shadow-[0_0_15px_rgba(233,30,140,0.2)] hover:bg-[#9C27B0]/40 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[28px]" data-icon="local_fire_department" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</button>
+</div>
+<!-- Hint Text -->
+<p class="font-label-md text-on-surface-variant/70 animate-pulse tracking-widest uppercase">Tap to talk to her</p>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-3 bg-surface/80 backdrop-blur-3xl border-t border-outline-variant/30 shadow-[0px_-8px_24px_rgba(74,45,110,0.4)]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-colors active:scale-90 duration-200 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="chat">chat</span>
+<span class="font-label-md">Chat</span>
+</a>
+<!-- Active Tab: Character View -->
+<a class="flex flex-col items-center justify-center bg-secondary-container/20 text-primary rounded-xl px-4 py-1.5 shadow-[0_0_15px_rgba(233,30,140,0.3)] active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person_pin" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person_pin</span>
+<span class="font-label-md">Character</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-colors active:scale-90 duration-200 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-label-md">Settings</span>
+</a>
+</nav>
+</body></html>
