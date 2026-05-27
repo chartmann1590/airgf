@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirGF - AI Virtual Companion</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --primary: #a78bfa;
+            --primary-dim: #7c5cbf;
+            --accent: #f472b6;
+            --text: #e4e4e7;
+            --text-dim: #a1a1aa;
+            --border: #27272a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(167, 139, 250, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(244, 114, 182, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(167, 139, 250, 0.04) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            text-align: center;
+            padding: 80px 0 40px;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-size: 20px;
+            color: var(--text-dim);
+            margin-top: 12px;
+            font-weight: 400;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 40px 0 60px;
+        }
+
+        .hero h2 {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 20px;
+        }
+
+        .hero h2 span {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+            color: white;
+            box-shadow: 0 4px 24px rgba(167, 139, 250, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 32px rgba(167, 139, 250, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: rgba(167, 139, 250, 0.05);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 40px 0 80px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: border-color 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary-dim);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .tech-section {
+            text-align: center;
+            padding: 40px 0 80px;
+        }
+
+        .tech-section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .tech-badge {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+            header { padding: 48px 0 24px; }
+            .logo { font-size: 36px; }
+            .hero h2 { font-size: 28px; }
+            .hero p { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">AirGF</div>
+            <p class="tagline">Your AI companion, entirely on your device.</p>
+        </header>
+
+        <section class="hero">
+            <h2>Private. Personal. <span>Powered by AI.</span></h2>
+            <p>
+                AirGF is an on-device AI companion app for Android. No cloud, no subscriptions,
+                no data leaving your phone. Powered by Gemma 4 with 3D avatars, voice, and image sharing.
+            </p>
+            <div class="cta-group">
+                <a href="https://github.com/chartmann1590/airgf/releases/latest" class="btn btn-primary">
+                    Download APK
+                </a>
+                <a href="https://github.com/chartmann1590/airgf" class="btn btn-outline">
+                    View Source
+                </a>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F9E0;</div>
+                <h3>On-Device AI</h3>
+                <p>Gemma 4 E2B runs entirely on your phone. No internet needed for conversations. Your chats never leave your device.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F464;</div>
+                <h3>3D Avatars</h3>
+                <p>14 unique 3D character models with real-time emotion-driven expressions, lip sync, and idle animations.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F5BC;</div>
+                <h3>Image Sharing</h3>
+                <p>Send photos from your gallery or camera. Your AI companion understands images and can generate pictures with on-device Stable Diffusion.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F50A;</div>
+                <h3>Voice & TTS</h3>
+                <p>Multiple voice profiles with real-time text-to-speech and word-level lip sync animation on the 3D avatar.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F3AD;</div>
+                <h3>Personality</h3>
+                <p>Choose from 8 personality traits, set relationship type, and customize communication style. She adapts to you.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F512;</div>
+                <h3>100% Private</h3>
+                <p>Everything runs on-device. No accounts, no cloud APIs, no telemetry. Your companion is yours alone.</p>
+            </div>
+        </section>
+
+        <section class="tech-section">
+            <h2>Built With</h2>
+            <div class="tech-grid">
+                <span class="tech-badge">Kotlin</span>
+                <span class="tech-badge">Jetpack Compose</span>
+                <span class="tech-badge">Gemma 4 E2B</span>
+                <span class="tech-badge">LiteRT-LM</span>
+                <span class="tech-badge">MediaPipe</span>
+                <span class="tech-badge">SceneView</span>
+                <span class="tech-badge">Room DB</span>
+                <span class="tech-badge">Hilt</span>
+                <span class="tech-badge">Material 3</span>
+                <span class="tech-badge">Coil</span>
+            </div>
+        </section>
+
+        <footer>
+            <p>AirGF &mdash; Open source AI companion. Android 8.0+ (API 26).</p>
+        </footer>
+    </div>
+</body>
+</html>
