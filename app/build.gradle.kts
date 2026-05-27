@@ -115,11 +115,6 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation("androidx.lifecycle:lifecycle-common-java8") {
-        version {
-            strictly(libs.versions.lifecycle.get())
-        }
-    }
 
     implementation(libs.kotlinx.serialization.json)
 
