@@ -4,277 +4,503 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AirGF - AI Virtual Companion</title>
+    <meta name="description" content="Private, on-device AI companion for Android. Powered by Gemma 4 with 3D avatars, voice, and image sharing. No cloud, no accounts.">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
         :root {
-            --bg: #0a0a0f;
-            --surface: #13131a;
-            --primary: #a78bfa;
-            --primary-dim: #7c5cbf;
+            --bg: #0c0515;
+            --surface: #150d24;
+            --surface-hover: #1c1230;
+            --primary: #c084fc;
+            --primary-bright: #d8b4fe;
             --accent: #f472b6;
-            --text: #e4e4e7;
-            --text-dim: #a1a1aa;
-            --border: #27272a;
+            --accent-dim: #ec4899;
+            --text: #f0edf5;
+            --text-dim: #9d8fb8;
+            --border: #2d1f47;
+            --glow-purple: rgba(192, 132, 252, 0.15);
+            --glow-pink: rgba(244, 114, 182, 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .gradient-bg {
+        .noise {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(167, 139, 250, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(244, 114, 182, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(167, 139, 250, 0.04) 0%, transparent 50%);
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
             z-index: 0;
         }
+
+        .gradient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 { width: 600px; height: 600px; top: -200px; left: -100px; background: var(--glow-purple); }
+        .orb-2 { width: 500px; height: 500px; top: 30%; right: -150px; background: var(--glow-pink); }
+        .orb-3 { width: 700px; height: 700px; bottom: -200px; left: 30%; background: var(--glow-purple); opacity: 0.5; }
 
         .container {
             position: relative;
             z-index: 1;
-            max-width: 960px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 0 24px;
         }
 
-        header {
-            text-align: center;
-            padding: 80px 0 40px;
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(12, 5, 21, 0.7);
+            border-bottom: 1px solid var(--border);
         }
-
-        .logo {
-            font-size: 48px;
+        nav .inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-brand {
+            font-size: 22px;
             font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
-
-        .tagline {
-            font-size: 20px;
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
             color: var(--text-dim);
-            margin-top: 12px;
-            font-weight: 400;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
         }
+        .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+        .nav-links .btn-nav {
+            background: linear-gradient(135deg, var(--accent-dim), var(--primary));
+            color: white;
+            font-weight: 600;
+        }
+        .nav-links .btn-nav:hover { opacity: 0.9; }
 
+        /* HERO */
         .hero {
             text-align: center;
-            padding: 40px 0 60px;
+            padding: 140px 0 80px;
         }
-
-        .hero h2 {
-            font-size: 36px;
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 20px;
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 28px;
         }
-
-        .hero h2 span {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+        .hero-badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
+        }
+        .hero h1 {
+            font-size: clamp(40px, 6vw, 68px);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 24px;
+        }
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--primary-bright), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
         .hero p {
             font-size: 18px;
             color: var(--text-dim);
-            max-width: 600px;
-            margin: 0 auto 32px;
-            line-height: 1.6;
+            max-width: 520px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
         }
-
-        .cta-group {
+        .hero-actions {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             justify-content: center;
             flex-wrap: wrap;
         }
-
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 14px 28px;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.25s;
             cursor: pointer;
             border: none;
+            font-family: inherit;
         }
-
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+            background: linear-gradient(135deg, var(--accent-dim), #a855f7);
             color: white;
-            box-shadow: 0 4px 24px rgba(167, 139, 250, 0.3);
+            box-shadow: 0 4px 30px rgba(236, 72, 153, 0.3), 0 0 0 1px rgba(236, 72, 153, 0.1);
         }
-
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 32px rgba(167, 139, 250, 0.4);
+            box-shadow: 0 8px 40px rgba(236, 72, 153, 0.4), 0 0 0 1px rgba(236, 72, 153, 0.2);
         }
-
-        .btn-outline {
-            background: transparent;
+        .btn-secondary {
+            background: var(--surface);
             color: var(--text);
             border: 1px solid var(--border);
         }
-
-        .btn-outline:hover {
+        .btn-secondary:hover {
             border-color: var(--primary);
-            background: rgba(167, 139, 250, 0.05);
+            background: var(--surface-hover);
         }
+        .btn svg { width: 18px; height: 18px; }
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
+        /* SCREENSHOTS */
+        .screenshots {
             padding: 40px 0 80px;
+            overflow: hidden;
+        }
+        .screenshot-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .screenshot-frame {
+            width: 220px;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px var(--glow-purple);
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex-shrink: 0;
+        }
+        .screenshot-frame:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px var(--glow-purple);
+        }
+        .screenshot-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
+        /* FEATURES */
+        .features {
+            padding: 80px 0;
+        }
+        .section-label {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 56px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
         .feature-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 28px;
-            transition: border-color 0.2s;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
         }
-
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
         .feature-card:hover {
-            border-color: var(--primary-dim);
+            border-color: rgba(192, 132, 252, 0.3);
+            background: var(--surface-hover);
+            transform: translateY(-2px);
         }
-
+        .feature-card:hover::before { opacity: 1; }
         .feature-icon {
-            font-size: 32px;
-            margin-bottom: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, rgba(192, 132, 252, 0.15), rgba(244, 114, 182, 0.1));
+            border: 1px solid rgba(192, 132, 252, 0.15);
         }
-
         .feature-card h3 {
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 700;
             margin-bottom: 8px;
         }
-
         .feature-card p {
             font-size: 14px;
             color: var(--text-dim);
             line-height: 1.6;
         }
 
-        .tech-section {
+        /* PRIVACY */
+        .privacy-banner {
+            margin: 0 0 80px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
             text-align: center;
-            padding: 40px 0 80px;
+            position: relative;
+            overflow: hidden;
         }
-
-        .tech-section h2 {
+        .privacy-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(192, 132, 252, 0.03), rgba(244, 114, 182, 0.03));
+            pointer-events: none;
+        }
+        .privacy-banner h2 {
             font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 32px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .privacy-banner p {
+            font-size: 16px;
+            color: var(--text-dim);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+        .privacy-pills {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .privacy-pill {
+            background: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
         }
 
+        /* TECH */
+        .tech {
+            padding: 0 0 80px;
+            text-align: center;
+        }
         .tech-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
+            max-width: 600px;
+            margin: 0 auto;
         }
-
         .tech-badge {
             background: var(--surface);
             border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
             color: var(--text-dim);
+            transition: all 0.2s;
+        }
+        .tech-badge:hover {
+            border-color: var(--primary);
+            color: var(--text);
         }
 
+        /* FOOTER */
         footer {
-            text-align: center;
-            padding: 40px 0;
             border-top: 1px solid var(--border);
+            padding: 32px 0;
+            text-align: center;
+        }
+        footer p {
             color: var(--text-dim);
-            font-size: 14px;
+            font-size: 13px;
+        }
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
         }
 
-        @media (max-width: 640px) {
-            header { padding: 48px 0 24px; }
-            .logo { font-size: 36px; }
-            .hero h2 { font-size: 28px; }
-            .hero p { font-size: 16px; }
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .features-grid { grid-template-columns: 1fr; }
+            .screenshot-frame { width: 160px; }
+            .hero { padding: 120px 0 60px; }
+            .privacy-banner { padding: 32px 20px; }
+            .nav-links a:not(.btn-nav) { display: none; }
+        }
+        @media (max-width: 480px) {
+            .screenshot-frame { width: 140px; }
+            .hero h1 { letter-spacing: -1px; }
         }
     </style>
 </head>
 <body>
-    <div class="gradient-bg"></div>
+    <div class="noise"></div>
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+
+    <nav>
+        <div class="inner">
+            <div class="nav-brand">AirGF</div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="https://github.com/chartmann1590/airgf">GitHub</a>
+                <a href="https://github.com/chartmann1590/airgf/releases/latest" class="btn-nav">Download</a>
+            </div>
+        </div>
+    </nav>
 
     <div class="container">
-        <header>
-            <div class="logo">AirGF</div>
-            <p class="tagline">Your AI companion, entirely on your device.</p>
-        </header>
-
         <section class="hero">
-            <h2>Private. Personal. <span>Powered by AI.</span></h2>
-            <p>
-                AirGF is an on-device AI companion app for Android. No cloud, no subscriptions,
-                no data leaving your phone. Powered by Gemma 4 with 3D avatars, voice, and image sharing.
-            </p>
-            <div class="cta-group">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                100% on-device &middot; no cloud
+            </div>
+            <h1>Your AI companion,<br><span class="gradient">entirely private.</span></h1>
+            <p>AirGF runs a full AI model on your phone. No servers, no subscriptions, no data leaves your device. Ever.</p>
+            <div class="hero-actions">
                 <a href="https://github.com/chartmann1590/airgf/releases/latest" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Download APK
                 </a>
-                <a href="https://github.com/chartmann1590/airgf" class="btn btn-outline">
-                    View Source
+                <a href="https://github.com/chartmann1590/airgf" class="btn btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                    Source Code
                 </a>
             </div>
         </section>
 
-        <section class="features">
-            <div class="feature-card">
-                <div class="feature-icon">&#x1F9E0;</div>
-                <h3>On-Device AI</h3>
-                <p>Gemma 4 E2B runs entirely on your phone. No internet needed for conversations. Your chats never leave your device.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#x1F464;</div>
-                <h3>3D Avatars</h3>
-                <p>14 unique 3D character models with real-time emotion-driven expressions, lip sync, and idle animations.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#x1F5BC;</div>
-                <h3>Image Sharing</h3>
-                <p>Send photos from your gallery or camera. Your AI companion understands images and can generate pictures with on-device Stable Diffusion.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#x1F50A;</div>
-                <h3>Voice & TTS</h3>
-                <p>Multiple voice profiles with real-time text-to-speech and word-level lip sync animation on the 3D avatar.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#x1F3AD;</div>
-                <h3>Personality</h3>
-                <p>Choose from 8 personality traits, set relationship type, and customize communication style. She adapts to you.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">&#x1F512;</div>
-                <h3>100% Private</h3>
-                <p>Everything runs on-device. No accounts, no cloud APIs, no telemetry. Your companion is yours alone.</p>
+        <section class="screenshots">
+            <div class="screenshot-row">
+                <div class="screenshot-frame"><img src="screenshots/welcome.png" alt="Welcome screen" loading="lazy"></div>
+                <div class="screenshot-frame"><img src="screenshots/chat.png" alt="Chat interface" loading="lazy"></div>
+                <div class="screenshot-frame"><img src="screenshots/character.png" alt="3D character view" loading="lazy"></div>
+                <div class="screenshot-frame"><img src="screenshots/photo_sharing.png" alt="Photo sharing" loading="lazy"></div>
             </div>
         </section>
 
-        <section class="tech-section">
-            <h2>Built With</h2>
+        <section class="features" id="features">
+            <div class="section-label">Features</div>
+            <h2 class="section-title">Everything runs on your phone.</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F9E0;</div>
+                    <h3>Gemma 4 On-Device</h3>
+                    <p>A 2-billion parameter AI model runs directly on your phone. No internet needed. Conversations are instant and private.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F464;</div>
+                    <h3>3D Avatars</h3>
+                    <p>14 unique characters with real-time expressions, emotion-driven animation, and lip-synced speech.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F4F8;</div>
+                    <h3>Image Sharing</h3>
+                    <p>Send photos and she understands them. She can generate images too, powered by on-device Stable Diffusion.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F399;</div>
+                    <h3>Voice & Lip Sync</h3>
+                    <p>4 distinct voice profiles with word-level timing that drives lip sync animation on the 3D avatar in real time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x2728;</div>
+                    <h3>Deep Personality</h3>
+                    <p>8 personality traits, multiple relationship types, and communication styles. She remembers and adapts.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#x1F514;</div>
+                    <h3>Proactive Messages</h3>
+                    <p>She reaches out on her own with messages throughout the day. Configurable frequency from rarely to often.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="privacy-banner">
+            <h2>Privacy is not a feature. It's the architecture.</h2>
+            <p>There is no server. There is no account. There is no analytics SDK. The AI model, your conversations, and your data exist only on your device.</p>
+            <div class="privacy-pills">
+                <span class="privacy-pill">No cloud</span>
+                <span class="privacy-pill">No accounts</span>
+                <span class="privacy-pill">No telemetry</span>
+                <span class="privacy-pill">No subscriptions</span>
+            </div>
+        </div>
+
+        <section class="tech">
+            <div class="section-label">Built with</div>
+            <h2 class="section-title">Modern Android stack.</h2>
             <div class="tech-grid">
                 <span class="tech-badge">Kotlin</span>
                 <span class="tech-badge">Jetpack Compose</span>
@@ -282,15 +508,16 @@
                 <span class="tech-badge">LiteRT-LM</span>
                 <span class="tech-badge">MediaPipe</span>
                 <span class="tech-badge">SceneView</span>
-                <span class="tech-badge">Room DB</span>
+                <span class="tech-badge">Room</span>
                 <span class="tech-badge">Hilt</span>
                 <span class="tech-badge">Material 3</span>
                 <span class="tech-badge">Coil</span>
+                <span class="tech-badge">WorkManager</span>
             </div>
         </section>
 
         <footer>
-            <p>AirGF &mdash; Open source AI companion. Android 8.0+ (API 26).</p>
+            <p>AirGF &mdash; Android 8.0+ (API 26) &middot; <a href="https://github.com/chartmann1590/airgf">GitHub</a></p>
         </footer>
     </div>
 </body>
