@@ -7,6 +7,7 @@ import com.airgf.app.domain.model.Message
 import com.airgf.app.domain.model.UserProfile
 import com.airgf.app.domain.repository.ChatRepository
 import com.airgf.app.domain.repository.GfConfigRepository
+import com.airgf.app.domain.repository.ImageGenRepository
 import com.airgf.app.domain.repository.ModelRepository
 import com.airgf.app.domain.repository.UserRepository
 import com.airgf.app.notification.ProactiveMessageScheduler
@@ -161,6 +162,18 @@ class FakeModelRepository(
 
     override fun hasSufficientStorage(): Boolean = true
 
+    override fun downloadModel(): Flow<DownloadState> = flowOf(DownloadState.Idle)
+}
+
+class FakeImageGenRepository(
+    private var modelDownloaded: Boolean = false,
+) : ImageGenRepository {
+    override suspend fun isModelDownloaded(): Boolean = modelDownloaded
+    override suspend fun getModelPath(): String? = if (modelDownloaded) "/tmp/sd_model" else null
+    override suspend fun setModelDownloaded(path: String) { modelDownloaded = true }
+    override suspend fun clearModel() { modelDownloaded = false }
+    override fun isNetworkAvailable(): Boolean = true
+    override fun hasSufficientStorage(): Boolean = true
     override fun downloadModel(): Flow<DownloadState> = flowOf(DownloadState.Idle)
 }
 

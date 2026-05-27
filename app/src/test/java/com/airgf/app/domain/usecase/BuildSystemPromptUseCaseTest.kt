@@ -8,6 +8,7 @@ import com.airgf.app.domain.model.UserProfile
 import com.airgf.app.domain.model.VisualTemplate
 import com.airgf.app.domain.model.VoiceOption
 import com.airgf.app.testutil.FakeGfConfigRepository
+import com.airgf.app.testutil.FakeImageGenRepository
 import com.airgf.app.testutil.FakeUserRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertThrows
@@ -37,7 +38,7 @@ class BuildSystemPromptUseCaseTest {
             ),
         )
 
-        val prompt = BuildSystemPromptUseCase(gfRepository, userRepository)()
+        val prompt = BuildSystemPromptUseCase(gfRepository, userRepository, FakeImageGenRepository())()
 
         assertTrue(prompt.contains("You are Mina, a virtual girlfriend."))
         assertTrue(prompt.contains("Your partner's name is Alex."))
@@ -54,6 +55,7 @@ class BuildSystemPromptUseCaseTest {
         val useCase = BuildSystemPromptUseCase(
             gfConfigRepository = FakeGfConfigRepository(),
             userRepository = FakeUserRepository(),
+            imageGenRepository = FakeImageGenRepository(),
         )
 
         assertThrows(IllegalStateException::class.java) {
