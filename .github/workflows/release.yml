@@ -24,27 +24,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Determine next version code
+      - name: Determine next version
         id: version
         run: |
           CURRENT=$(grep 'versionCode' app/build.gradle.kts | head -1 | grep -o '[0-9]\+')
           NEXT=$((CURRENT + 1))
           CURRENT_NAME=$(grep 'versionName' app/build.gradle.kts | head -1 | grep -o '"[^"]*"' | tr -d '"')
 
-          # Bump patch version
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
           NEW_PATCH=$((PATCH + 1))
           NEW_NAME="${MAJOR}.${MINOR}.${NEW_PATCH}"
@@ -68,7 +57,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease --no-daemon
+        run: gradle assembleRelease --no-daemon
 
       - name: Commit version bump
         run: |
