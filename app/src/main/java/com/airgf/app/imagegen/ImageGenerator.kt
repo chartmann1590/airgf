@@ -40,15 +40,15 @@ class ImageGenerator @Inject constructor(
         initialize(path)
     }
 
-    suspend fun initialize(path: String) {
-        if (mpGenerator != null && modelPath == path) return
+    suspend fun initialize(path: String) = withContext(Dispatchers.IO) {
+        if (mpGenerator != null && modelPath == path) return@withContext
         release()
         _state = GenState.Loading
         try {
             val dir = File(path)
             if (!dir.exists()) {
                 _state = GenState.Error("Model directory not found at: $path")
-                return
+                return@withContext
             }
             val options = ImageGeneratorOptions.builder()
                 .setImageGeneratorModelDirectory(path)

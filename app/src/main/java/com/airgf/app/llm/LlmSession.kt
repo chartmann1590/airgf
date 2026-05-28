@@ -1,6 +1,7 @@
 ﻿package com.airgf.app.llm
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.airgf.app.core.util.BitmapDescriber
 import com.google.ai.edge.litertlm.Conversation
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,7 @@ class LlmSession(
                 append(text)
             }
         }
+        Log.d("LlmSession", "Sending image message: $prompt")
         return sendMessage(prompt)
     }
 

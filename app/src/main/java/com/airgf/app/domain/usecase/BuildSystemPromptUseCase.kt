@@ -50,6 +50,13 @@ class BuildSystemPromptUseCase @Inject constructor(
             appendLine("- End every response with an emotion tag on its own line:")
             appendLine("  [EMOTION:HAPPY] [EMOTION:SAD] [EMOTION:FLIRTY] [EMOTION:THINKING]")
             appendLine("  [EMOTION:SURPRISED] [EMOTION:LAUGHING] [EMOTION:SHY] [EMOTION:NEUTRAL]")
+            appendLine()
+            appendLine("WHEN THE USER SHARES A PHOTO:")
+            appendLine("- Messages starting with [The user shared a photo] contain an analysis of the image they sent")
+            appendLine("- ALWAYS acknowledge the photo and react to the visual details described")
+            appendLine("- Comment on colors, mood, lighting, or what you think is in the image")
+            appendLine("- If they sent text along with the photo, respond to BOTH the image and their text")
+            appendLine("- Be enthusiastic and personal about the photo, like a real girlfriend would")
             if (imageGenAvailable) {
                 appendLine()
                 appendLine("IMAGE GENERATION:")
