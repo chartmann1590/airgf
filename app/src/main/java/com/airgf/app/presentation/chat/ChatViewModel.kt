@@ -18,7 +18,6 @@ import com.airgf.app.domain.model.EmotionState
 import com.airgf.app.domain.usecase.BuildSystemPromptUseCase
 import com.airgf.app.domain.usecase.SendMessageEvent
 import com.airgf.app.domain.usecase.SendMessageUseCase
-import com.airgf.app.imagegen.ImageGenerator
 import com.airgf.app.llm.LlmEngine
 import com.airgf.app.llm.LlmSession
 import com.airgf.app.tts.LipSyncBridge
@@ -65,7 +64,6 @@ class ChatViewModel @Inject constructor(
     private val lipSyncBridge: LipSyncBridge,
     private val animationController: CharacterAnimationController,
     private val imageStorageUtil: ImageStorageUtil,
-    private val imageGenerator: ImageGenerator,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChatUiState())
@@ -138,7 +136,6 @@ class ChatViewModel @Inject constructor(
 
                 ttsManager.ensureInitialized()
                 initializeLlm()
-                launch { imageGenerator.ensureInitialized() }
             } catch (e: Throwable) {
                 _state.update {
                     it.copy(
@@ -199,8 +196,12 @@ class ChatViewModel @Inject constructor(
     }
 
     fun sendMessage() {
+        sendMessage(textOverride = null)
+    }
+
+    private fun sendMessage(textOverride: String?) {
         val current = _state.value
-        val text = current.inputText.trim()
+        val text = textOverride?.trim() ?: current.inputText.trim()
         if ((text.isEmpty() && current.pendingImageUri == null) || current.isGenerating) return
         if (current.llmState !is LlmEngine.LlmState.Ready) {
             _state.update { it.copy(error = "AI model is not ready yet") }
@@ -277,8 +278,7 @@ class ChatViewModel @Inject constructor(
     fun requestImage() {
         val current = _state.value
         if (current.isGenerating) return
-        onInputChange("Send me a picture of yourself")
-        sendMessage()
+        sendMessage(textOverride = "Send me a picture of yourself")
     }
 
     fun toggleSpicyMode() {

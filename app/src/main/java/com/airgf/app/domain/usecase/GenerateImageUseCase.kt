@@ -15,12 +15,16 @@ class GenerateImageUseCase @Inject constructor(
     private val imageStorageUtil: ImageStorageUtil,
 ) {
     suspend operator fun invoke(prompt: String): GenerateImageEvent {
+        var bitmap: android.graphics.Bitmap? = null
         return try {
-            val bitmap = imageGenerator.generate(prompt)
+            bitmap = imageGenerator.generate(prompt)
             val saved = imageStorageUtil.saveGeneratedBitmap(bitmap, prompt)
             GenerateImageEvent.Complete(saved.path)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             GenerateImageEvent.Error(e.message ?: "Failed to generate image")
+        } finally {
+            bitmap?.recycle()
+            imageGenerator.release()
         }
     }
 }

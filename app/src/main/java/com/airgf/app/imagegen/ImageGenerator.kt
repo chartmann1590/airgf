@@ -66,16 +66,30 @@ class ImageGenerator @Inject constructor(
 
     suspend fun generate(prompt: String, steps: Int = 20, seed: Int = -1): Bitmap =
         withContext(Dispatchers.Default) {
-            val generator = mpGenerator
-            if (generator == null) {
-                ensureInitialized()
-                val retryGen = mpGenerator
-                    ?: throw IllegalStateException("Image generator not initialized")
-                generateWithGenerator(retryGen, prompt, steps, seed)
-            } else {
-                generateWithGenerator(generator, prompt, steps, seed)
+            val firstGenerator = getInitializedGenerator()
+            try {
+                generateWithGenerator(firstGenerator, prompt, steps, seed)
+            } catch (firstError: Throwable) {
+                Log.w(TAG, "Image generation failed; reinitializing generator and retrying once", firstError)
+                release()
+                val retryGenerator = getInitializedGenerator()
+                try {
+                    generateWithGenerator(retryGenerator, prompt, steps, seed)
+                } catch (retryError: Throwable) {
+                    release()
+                    throw IllegalStateException(
+                        retryError.message ?: "Failed to generate image",
+                        retryError,
+                    )
+                }
             }
         }
+
+    private suspend fun getInitializedGenerator(): MpImageGenerator {
+        mpGenerator?.let { return it }
+        ensureInitialized()
+        return mpGenerator ?: throw IllegalStateException("Image generator not initialized")
+    }
 
     private fun generateWithGenerator(
         generator: MpImageGenerator,

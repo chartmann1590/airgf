@@ -36,7 +36,8 @@ class SendMessageUseCase @Inject constructor(
         val trimmed = text.trim()
         if (trimmed.isEmpty() && imagePath == null) return@flow
 
-        val spicyMode = gfConfigRepository.getProfile()?.spicyModeEnabled ?: false
+        val gfProfile = gfConfigRepository.getProfile()
+        val spicyMode = gfProfile?.spicyModeEnabled ?: false
         val timestamp = System.currentTimeMillis()
 
         val userMessage = Message(
@@ -48,6 +49,8 @@ class SendMessageUseCase @Inject constructor(
             imagePath = imagePath,
         )
         chatRepository.insertMessage(userMessage)
+
+        val explicitImagePrompt = gfProfile?.let { buildDirectImagePrompt(trimmed, it.name) }
 
         val responseBuilder = StringBuilder()
         try {
@@ -74,12 +77,14 @@ class SendMessageUseCase @Inject constructor(
         }
 
         val (afterEmotion, emotion) = detectEmotionUseCase(rawResponse)
-        val (cleanText, imagePrompt) = detectImageRequestUseCase(afterEmotion)
+        val (cleanText, taggedImagePrompt) = detectImageRequestUseCase(afterEmotion)
+        val imagePrompt = taggedImagePrompt ?: explicitImagePrompt
 
-        if (imagePrompt != null && imageGenerator.isAvailable()) {
+        if (imagePrompt != null) {
             emit(SendMessageEvent.GeneratingImage(imagePrompt, cleanText))
+            var generatedBitmap: Bitmap? = null
             try {
-                val generatedBitmap = imageGenerator.generate(imagePrompt)
+                generatedBitmap = imageGenerator.generate(imagePrompt)
                 val savedImage = imageStorageUtil.saveGeneratedBitmap(generatedBitmap, imagePrompt)
                 val modelMessage = Message(
                     conversationId = conversationId,
@@ -93,17 +98,11 @@ class SendMessageUseCase @Inject constructor(
                 )
                 chatRepository.insertMessage(modelMessage)
                 emit(SendMessageEvent.Complete(modelMessage))
-            } catch (_: Exception) {
-                val modelMessage = Message(
-                    conversationId = conversationId,
-                    content = cleanText,
-                    isUser = false,
-                    timestamp = System.currentTimeMillis(),
-                    emotion = emotion,
-                    isSpicyMode = spicyMode,
-                )
-                chatRepository.insertMessage(modelMessage)
-                emit(SendMessageEvent.Complete(modelMessage))
+            } catch (e: Throwable) {
+                emit(SendMessageEvent.Error(e.message ?: "Failed to generate image"))
+            } finally {
+                generatedBitmap?.recycle()
+                imageGenerator.release()
             }
         } else {
             val modelMessage = Message(
@@ -117,5 +116,39 @@ class SendMessageUseCase @Inject constructor(
             chatRepository.insertMessage(modelMessage)
             emit(SendMessageEvent.Complete(modelMessage))
         }
+    }
+
+    private fun buildDirectImagePrompt(text: String, gfName: String): String? {
+        val normalized = text.lowercase()
+        val asksForImage = listOf(
+            "send me a picture",
+            "send me a pic",
+            "send pic",
+            "send a pic",
+            "send picture",
+            "send photo",
+            "send me a photo",
+            "send me selfie",
+            "send me a selfie",
+            "send selfie",
+            "show me a picture",
+            "show me a pic",
+            "show me a photo",
+            "show me yourself",
+            "picture of yourself",
+            "photo of yourself",
+            "pic of yourself",
+            "selfie",
+        ).any(normalized::contains)
+
+        if (!asksForImage) return null
+
+        val isSelfie = listOf("selfie", "yourself", "you").any(normalized::contains)
+        val subject = if (isSelfie) {
+            "$gfName, an adult woman, warm natural selfie"
+        } else {
+            "$gfName, an adult woman, personal photo"
+        }
+        return "$subject, expressive eyes, soft flattering light, tasteful outfit, realistic portrait, high detail"
     }
 }

@@ -2,6 +2,7 @@
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ fun ChatBubble(
     showAvatar: Boolean,
     modifier: Modifier = Modifier,
     displayContent: String = message.content,
+    onImageClick: (String) -> Unit = {},
 ) {
     if (message.isUser) {
         UserChatBubble(
@@ -53,6 +55,7 @@ fun ChatBubble(
             imagePath = message.imagePath,
             timestamp = message.timestamp,
             modifier = modifier,
+            onImageClick = onImageClick,
         )
     } else {
         GfChatBubble(
@@ -63,6 +66,7 @@ fun ChatBubble(
             visualTemplate = visualTemplate,
             showAvatar = showAvatar,
             modifier = modifier,
+            onImageClick = onImageClick,
         )
     }
 }
@@ -71,6 +75,7 @@ fun ChatBubble(
 private fun ChatBubbleImage(
     imagePath: String?,
     shape: RoundedCornerShape,
+    onImageClick: (String) -> Unit,
 ) {
     if (imagePath == null) return
     val file = File(imagePath)
@@ -82,7 +87,8 @@ private fun ChatBubbleImage(
         modifier = Modifier
             .fillMaxWidth()
             .height(280.dp)
-            .clip(shape),
+            .clip(shape)
+            .clickable { onImageClick(imagePath) },
     )
 }
 
@@ -92,6 +98,7 @@ private fun UserChatBubble(
     imagePath: String?,
     timestamp: Long,
     modifier: Modifier = Modifier,
+    onImageClick: (String) -> Unit,
 ) {
     val bubbleShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 4.dp)
     Column(
@@ -108,7 +115,11 @@ private fun UserChatBubble(
                 ),
         ) {
             Column {
-                ChatBubbleImage(imagePath = imagePath, shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = if (content.isBlank()) 16.dp else 4.dp, bottomEnd = if (content.isBlank()) 4.dp else 4.dp))
+                ChatBubbleImage(
+                    imagePath = imagePath,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = if (content.isBlank()) 16.dp else 4.dp, bottomEnd = if (content.isBlank()) 4.dp else 4.dp),
+                    onImageClick = onImageClick,
+                )
                 if (content.isNotBlank()) {
                     Text(
                         text = content,
@@ -144,6 +155,7 @@ private fun GfChatBubble(
     visualTemplate: VisualTemplate?,
     showAvatar: Boolean,
     modifier: Modifier = Modifier,
+    onImageClick: (String) -> Unit,
 ) {
     val bubbleShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp)
     Row(
@@ -174,7 +186,11 @@ private fun GfChatBubble(
                     ),
             ) {
                 Column {
-                    ChatBubbleImage(imagePath = imagePath, shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = if (content.isBlank()) 16.dp else 4.dp, bottomStart = if (content.isBlank()) 4.dp else 4.dp))
+                    ChatBubbleImage(
+                        imagePath = imagePath,
+                        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = if (content.isBlank()) 16.dp else 4.dp, bottomStart = if (content.isBlank()) 4.dp else 4.dp),
+                        onImageClick = onImageClick,
+                    )
                     if (content.isNotBlank()) {
                         Text(
                             text = content,

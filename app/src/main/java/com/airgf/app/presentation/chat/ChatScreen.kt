@@ -74,6 +74,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -100,6 +102,7 @@ import com.airgf.app.presentation.theme.PurpleShadow
 import com.airgf.app.presentation.theme.SurfaceContainerHigh
 import com.airgf.app.presentation.theme.UserBubbleEnd
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun ChatScreen(
@@ -113,6 +116,7 @@ fun ChatScreen(
     val gfName = uiState.gfProfile?.name ?: "Your GF"
     val isKeyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     var isInputFocused by remember { mutableStateOf(false) }
+    var previewImagePath by remember { mutableStateOf<String?>(null) }
 
     val pickMediaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -292,6 +296,7 @@ fun ChatScreen(
                                         visualTemplate = uiState.gfProfile?.visualTemplate,
                                         showAvatar = showAvatar,
                                         modifier = Modifier.padding(vertical = 4.dp),
+                                        onImageClick = { previewImagePath = it },
                                     )
                                 }
 
@@ -310,6 +315,57 @@ fun ChatScreen(
                         }
                     }
                 }
+            }
+        }
+
+        previewImagePath?.let { imagePath ->
+            ImagePreviewDialog(
+                imagePath = imagePath,
+                onDismiss = { previewImagePath = null },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ImagePreviewDialog(
+    imagePath: String,
+    onDismiss: () -> Unit,
+) {
+    val file = File(imagePath)
+    if (!file.exists()) {
+        onDismiss()
+        return
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.94f))
+                .clickable(onClick = onDismiss),
+            contentAlignment = Alignment.Center,
+        ) {
+            AsyncImage(
+                model = file,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            )
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.45f)),
+            ) {
+                Icon(Icons.Default.Close, contentDescription = "Close image", tint = Color.White)
             }
         }
     }
