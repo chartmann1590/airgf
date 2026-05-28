@@ -13,6 +13,9 @@
 
 # MediaPipe image generation uses reflection and JNI.
 -keep class com.google.mediapipe.** { *; }
+-dontwarn com.google.auto.value.extension.memoized.Memoized
+-dontwarn com.google.mediapipe.proto.CalculatorProfileProto$CalculatorProfile
+-dontwarn com.google.mediapipe.proto.GraphTemplateProto$CalculatorGraphTemplate
 
 # Filament / SceneView 3D renderer uses JNI.
 -keep class com.google.android.filament.** { *; }
