@@ -63,6 +63,7 @@ fun AvatarRenderer(
     mouthShape: LipSyncBridge.MouthShape,
     assetRepository: AvatarAssetRepository,
     modifier: Modifier = Modifier,
+    environmentAssetPath: String? = null,
 ) {
     val scope = rememberCoroutineScope()
     val engine = rememberEngine()
@@ -84,6 +85,9 @@ fun AvatarRenderer(
         is AvatarModelSource.ProceduralFallback -> null
     }
     val modelInstance = sourcePath?.let { rememberModelInstance(modelLoader, it) }
+    val envModelInstance = environmentAssetPath?.let {
+        runCatching { rememberModelInstance(modelLoader, it) }.getOrNull()
+    }
 
     val idleTransition = rememberInfiniteTransition(label = "avatarIdle")
     val idleLift by idleTransition.animateFloat(
@@ -98,16 +102,20 @@ fun AvatarRenderer(
 
     val backdrop = template.fallbackPalette
 
+    val bgBrush = if (envModelInstance != null) {
+        Brush.verticalGradient(listOf(Color.Black, Color.Black))
+    } else {
+        Brush.verticalGradient(
+            listOf(
+                Color(backdrop.backdropStartColor),
+                Color(backdrop.backdropEndColor),
+            ),
+        )
+    }
+
     Box(
         modifier = modifier
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(backdrop.backdropStartColor),
-                        Color(backdrop.backdropEndColor),
-                    ),
-                ),
-            )
+            .background(bgBrush)
             .clip(RoundedCornerShape(24.dp)),
     ) {
         if (modelInstance != null) {
@@ -116,9 +124,15 @@ fun AvatarRenderer(
                 engine = engine,
                 modelLoader = modelLoader,
             ) {
+                if (envModelInstance != null) {
+                    ModelNode(
+                        modelInstance = envModelInstance,
+                        scaleToUnits = 8f,
+                    )
+                }
                 ModelNode(
                     modelInstance = modelInstance,
-                    scaleToUnits = 2.2f,
+                    scaleToUnits = if (envModelInstance != null) 1.8f else 2.2f,
                     autoAnimate = true,
                 )
             }

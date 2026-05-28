@@ -137,6 +137,7 @@ fun CharacterScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(RoundedCornerShape(24.dp)),
+                        environmentAssetPath = BEDROOM_ENVIRONMENT_PATH,
                     )
 
                     // Bottom gradient for text readability
@@ -264,6 +265,8 @@ fun CharacterScreen(
         }
     }
 }
+
+private const val BEDROOM_ENVIRONMENT_PATH = "models/bedroom_interior.glb"
 
 @Composable
 private fun QuickActionButton(
