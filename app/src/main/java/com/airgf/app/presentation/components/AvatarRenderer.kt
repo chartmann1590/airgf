@@ -49,7 +49,9 @@ import com.airgf.app.presentation.theme.OnSurface
 import com.airgf.app.presentation.theme.OnSurfaceVariant
 import com.airgf.app.presentation.theme.Primary
 import com.airgf.app.tts.LipSyncBridge
+import dev.romainguy.kotlin.math.Float3
 import io.github.sceneview.SceneView
+import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberEngine
 import io.github.sceneview.rememberModelLoader
@@ -85,8 +87,10 @@ fun AvatarRenderer(
         is AvatarModelSource.ProceduralFallback -> null
     }
     val modelInstance = sourcePath?.let { rememberModelInstance(modelLoader, it) }
-    val envModelInstance = environmentAssetPath?.let {
-        runCatching { rememberModelInstance(modelLoader, it) }.getOrNull()
+    val envModelInstance = if (environmentAssetPath != null) {
+        rememberModelInstance(modelLoader, environmentAssetPath)
+    } else {
+        null
     }
 
     val idleTransition = rememberInfiniteTransition(label = "avatarIdle")
@@ -128,11 +132,17 @@ fun AvatarRenderer(
                     ModelNode(
                         modelInstance = envModelInstance,
                         scaleToUnits = 8f,
+                        centerOrigin = Position(0f, 0f, 0f),
                     )
                 }
                 ModelNode(
                     modelInstance = modelInstance,
-                    scaleToUnits = if (envModelInstance != null) 1.8f else 2.2f,
+                    scaleToUnits = if (envModelInstance != null) 1.9f else 2.2f,
+                    centerOrigin = if (envModelInstance != null) {
+                        Position(0f, 0f, 1.5f)
+                    } else {
+                        null
+                    },
                     autoAnimate = true,
                 )
             }
