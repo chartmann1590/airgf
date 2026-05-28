@@ -139,7 +139,7 @@ class ChatViewModel @Inject constructor(
                 ttsManager.ensureInitialized()
                 initializeLlm()
                 launch { imageGenerator.ensureInitialized() }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 _state.update {
                     it.copy(
                         error = e.message ?: "Failed to load chat",

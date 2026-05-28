@@ -58,7 +58,7 @@ class ImageGenerator @Inject constructor(
             modelPath = path
             _state = GenState.Ready
             Log.d(TAG, "ImageGenerator initialized with path: $path")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             _state = GenState.Error(e.message ?: "Failed to initialize image generator")
             Log.e(TAG, "Failed to initialize ImageGenerator", e)
         }

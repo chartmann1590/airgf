@@ -55,7 +55,7 @@ class LlmEngine @Inject constructor(
                     ),
                 )
 
-                var lastError: Exception? = null
+                var lastError: Throwable? = null
                 for (config in backendConfigs) {
                     try {
                         val newEngine = Engine(config)
@@ -63,7 +63,7 @@ class LlmEngine @Inject constructor(
                         engine = newEngine
                         _state.value = LlmState.Ready
                         return@withContext
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         lastError = e
                     }
                 }
@@ -71,7 +71,7 @@ class LlmEngine @Inject constructor(
                 _state.value = LlmState.Error(
                     lastError?.message ?: "Failed to load model",
                 )
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 _state.value = LlmState.Error(e.message ?: "Failed to load model")
             }
         }

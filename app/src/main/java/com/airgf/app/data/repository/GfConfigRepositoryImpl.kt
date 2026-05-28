@@ -40,15 +40,19 @@ class GfConfigRepositoryImpl @Inject constructor(
     }
 
     private fun GfConfigEntity.toDomain(): GfProfile {
-        val traits: List<PersonalityTrait> = json.decodeFromString(stringListSerializer, personalityTraits)
-            .mapNotNull { name -> runCatching { PersonalityTrait.valueOf(name) }.getOrNull() }
+        val traits: List<PersonalityTrait> = runCatching {
+            json.decodeFromString(stringListSerializer, personalityTraits)
+                .mapNotNull { name -> runCatching { PersonalityTrait.valueOf(name) }.getOrNull() }
+        }.getOrDefault(emptyList())
 
         return GfProfile(
             name = name,
             visualTemplate = VisualTemplate.fromPersistedName(visualTemplate),
             personalityTraits = traits,
-            relationshipType = RelationshipType.valueOf(relationshipType),
-            voiceOption = VoiceOption.valueOf(voiceOption),
+            relationshipType = runCatching { RelationshipType.valueOf(relationshipType) }
+                .getOrDefault(RelationshipType.ROMANTIC),
+            voiceOption = runCatching { VoiceOption.valueOf(voiceOption) }
+                .getOrDefault(VoiceOption.SOFT),
             spicyModeEnabled = spicyModeEnabled,
             customPromptAdditions = customPromptAdditions,
         )
