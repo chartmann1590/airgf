@@ -13,3 +13,11 @@
 
 # MediaPipe image generation uses reflection and JNI.
 -keep class com.google.mediapipe.** { *; }
+
+# Filament / SceneView 3D renderer uses JNI.
+-keep class com.google.android.filament.** { *; }
+-keep class io.github.sceneview.** { *; }
+
+# OkHttp - keep platform adapters used via reflection.
+-dontwarn okhttp3.internal.platform.**
+-keep class okhttp3.internal.platform.** { *; }

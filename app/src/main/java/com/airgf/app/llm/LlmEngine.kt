@@ -45,12 +45,12 @@ class LlmEngine @Inject constructor(
                 val backendConfigs = listOf(
                     EngineConfig(
                         modelPath = modelPath,
-                        backend = Backend.GPU(),
+                        backend = Backend.CPU(),
                         cacheDir = context.cacheDir.path,
                     ),
                     EngineConfig(
                         modelPath = modelPath,
-                        backend = Backend.CPU(),
+                        backend = Backend.GPU(),
                         cacheDir = context.cacheDir.path,
                     ),
                 )
