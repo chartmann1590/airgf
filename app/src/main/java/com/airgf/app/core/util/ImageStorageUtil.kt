@@ -29,7 +29,7 @@ class ImageStorageUtil @Inject constructor(
 
     fun savePickedImageFromUri(uri: android.net.Uri, description: String? = null): SavedImage? {
         ensureDirsExist()
-        val filename = "${UUID.randomUUID()}."
+        val filename = "${UUID.randomUUID()}.$IMAGE_EXTENSION"
         val destFile = File(userImagesDir, filename)
         return try {
             context.contentResolver.openInputStream(uri)?.use { input ->
@@ -45,7 +45,7 @@ class ImageStorageUtil @Inject constructor(
 
     fun saveGeneratedBitmap(bitmap: Bitmap, prompt: String? = null): SavedImage {
         ensureDirsExist()
-        val filename = "${UUID.randomUUID()}."
+        val filename = "${UUID.randomUUID()}.$IMAGE_EXTENSION"
         val destFile = File(generatedImagesDir, filename)
         FileOutputStream(destFile).use { out ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)

@@ -4,6 +4,11 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
@@ -62,6 +68,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -85,6 +93,7 @@ import com.airgf.app.presentation.components.TypingIndicator
 import com.airgf.app.presentation.components.shouldShowDateDivider
 import com.airgf.app.presentation.theme.OnSurface
 import com.airgf.app.presentation.theme.OnSurfaceVariant
+import com.airgf.app.presentation.theme.OutlineVariant
 import com.airgf.app.presentation.theme.Primary
 import com.airgf.app.presentation.theme.PrimaryContainer
 import com.airgf.app.presentation.theme.PurpleShadow
@@ -606,10 +615,7 @@ private fun StreamingBubble(
             if (isGeneratingImage) {
                 Column {
                     TypingIndicator()
-                    Text(
-                        text = "Creating an image...",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = OnSurfaceVariant,
+                    ImageGeneratingPlaceholder(
                         modifier = Modifier.padding(top = 4.dp),
                     )
                 }
@@ -632,11 +638,80 @@ private fun StreamingBubble(
                 displayContent = streamingText,
             )
             if (isGeneratingImage) {
+                ImageGeneratingPlaceholder(
+                    modifier = Modifier.padding(start = 48.dp, top = 4.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ImageGeneratingPlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    val bubbleShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp)
+    val infiniteTransition = rememberInfiniteTransition(label = "imageShimmer")
+    val shimmerOffset by infiniteTransition.animateFloat(
+        initialValue = -1f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "shimmerOffset",
+    )
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulseAlpha",
+    )
+
+    Column(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .height(200.dp)
+                .clip(bubbleShape)
+                .background(SurfaceContainerHigh.copy(alpha = 0.9f))
+                .border(
+                    width = 1.dp,
+                    color = OutlineVariant.copy(alpha = 0.3f),
+                    shape = bubbleShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            val shimmerBrush = Brush.linearGradient(
+                colors = listOf(
+                    PrimaryContainer.copy(alpha = 0.0f),
+                    PrimaryContainer.copy(alpha = 0.25f),
+                    PrimaryContainer.copy(alpha = 0.0f),
+                ),
+                start = Offset(shimmerOffset * 400f, 0f),
+                end = Offset(shimmerOffset * 400f + 400f, 400f),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(shimmerBrush),
+            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(28.dp),
+                    color = Primary.copy(alpha = pulseAlpha),
+                    strokeWidth = 2.5.dp,
+                )
                 Text(
-                    text = "Creating an image...",
+                    text = "Generating image...",
                     style = MaterialTheme.typography.bodySmall,
-                    color = OnSurfaceVariant,
-                    modifier = Modifier.padding(start = 52.dp, top = 4.dp),
+                    color = OnSurfaceVariant.copy(alpha = 0.8f),
                 )
             }
         }

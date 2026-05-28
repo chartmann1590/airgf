@@ -18,6 +18,7 @@ import com.airgf.app.domain.model.EmotionState
 import com.airgf.app.domain.usecase.BuildSystemPromptUseCase
 import com.airgf.app.domain.usecase.SendMessageEvent
 import com.airgf.app.domain.usecase.SendMessageUseCase
+import com.airgf.app.imagegen.ImageGenerator
 import com.airgf.app.llm.LlmEngine
 import com.airgf.app.llm.LlmSession
 import com.airgf.app.tts.LipSyncBridge
@@ -47,6 +48,7 @@ data class ChatUiState(
     val isSpeaking: Boolean = false,
     val pendingImageUri: Uri? = null,
     val pendingImageBitmap: Bitmap? = null,
+    val pendingImagePath: String? = null,
     val showAttachmentOptions: Boolean = false,
 )
 
@@ -63,6 +65,7 @@ class ChatViewModel @Inject constructor(
     private val lipSyncBridge: LipSyncBridge,
     private val animationController: CharacterAnimationController,
     private val imageStorageUtil: ImageStorageUtil,
+    private val imageGenerator: ImageGenerator,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChatUiState())
@@ -135,6 +138,7 @@ class ChatViewModel @Inject constructor(
 
                 ttsManager.ensureInitialized()
                 initializeLlm()
+                launch { imageGenerator.ensureInitialized() }
             } catch (e: Exception) {
                 _state.update {
                     it.copy(
@@ -158,6 +162,7 @@ class ChatViewModel @Inject constructor(
                 it.copy(
                     pendingImageUri = uri,
                     pendingImageBitmap = bitmap,
+                    pendingImagePath = saved.path,
                     showAttachmentOptions = false,
                 )
             }
@@ -172,6 +177,7 @@ class ChatViewModel @Inject constructor(
                 it.copy(
                     pendingImageUri = uri,
                     pendingImageBitmap = bitmap,
+                    pendingImagePath = saved.path,
                     showAttachmentOptions = false,
                 )
             }
@@ -180,7 +186,7 @@ class ChatViewModel @Inject constructor(
 
     fun clearPendingImage() {
         _state.update {
-            it.copy(pendingImageUri = null, pendingImageBitmap = null)
+            it.copy(pendingImageUri = null, pendingImageBitmap = null, pendingImagePath = null)
         }
     }
 
@@ -202,10 +208,7 @@ class ChatViewModel @Inject constructor(
         }
 
         val pendingBitmap = current.pendingImageBitmap
-        val pendingPath = if (current.pendingImageUri != null) {
-            val saved = imageStorageUtil.savePickedImageFromUri(current.pendingImageUri!!)
-            saved?.path
-        } else null
+        val pendingPath = current.pendingImagePath
 
         _state.update {
             it.copy(
@@ -215,6 +218,7 @@ class ChatViewModel @Inject constructor(
                 error = null,
                 pendingImageUri = null,
                 pendingImageBitmap = null,
+                pendingImagePath = null,
             )
         }
 

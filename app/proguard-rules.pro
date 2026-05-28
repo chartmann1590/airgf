@@ -10,3 +10,6 @@
 
 # LiteRT-LM and the model loader rely on JNI/native integrations.
 -keep class com.google.ai.edge.litertlm.** { *; }
+
+# MediaPipe image generation uses reflection and JNI.
+-keep class com.google.mediapipe.** { *; }

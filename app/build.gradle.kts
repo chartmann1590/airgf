@@ -62,6 +62,9 @@ android {
     }
 
     packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
@@ -105,6 +108,8 @@ dependencies {
     implementation(libs.litertlm.android)
 
     implementation(libs.okhttp)
+
+    implementation(libs.mediapipe.tasks.vision)
 
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)

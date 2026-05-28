@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.ensureActive
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import android.util.Log
 import java.io.File
 import java.io.IOException
+import java.util.zip.ZipInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.coroutineContext
@@ -23,13 +25,21 @@ class ImageGenModelDownloader @Inject constructor(
     @DownloadOkHttp private val client: OkHttpClient,
 ) {
     private val modelDir get() = File(context.filesDir, ImageGenConstants.MODEL_DIR)
+    private val extractedDir get() = File(modelDir, EXTRACTED_DIR_NAME)
 
     fun download(): Flow<DownloadState> = flow {
         modelDir.mkdirs()
         val destFile = File(modelDir, ImageGenConstants.MODEL_FILENAME)
-        if (destFile.exists() && isValidModelFile(destFile)) {
-            emit(DownloadState.Complete(destFile.absolutePath))
+        if (destFile.exists() && isValidModelFile(destFile) && isExtracted()) {
+            emit(DownloadState.Complete(extractedDir.absolutePath))
             return@flow
+        }
+        if (destFile.exists() && isValidModelFile(destFile) && !isExtracted()) {
+            val extracted = unzipModel(destFile)
+            if (extracted != null) {
+                emit(DownloadState.Complete(extracted))
+                return@flow
+            }
         }
 
         val partFile = File(modelDir, "${ImageGenConstants.MODEL_FILENAME}.part")
@@ -52,6 +62,7 @@ class ImageGenModelDownloader @Inject constructor(
                 else -> length
             }
             var downloadedBytes = 0L
+            var lastEmitTime = 0L
             body.byteStream().use { input ->
                 partFile.outputStream().use { output ->
                     val buffer = ByteArray(8192)
@@ -60,10 +71,15 @@ class ImageGenModelDownloader @Inject constructor(
                         coroutineContext.ensureActive()
                         output.write(buffer, 0, bytesRead)
                         downloadedBytes += bytesRead
-                        emit(DownloadState.Progress(downloadedBytes, totalBytes))
+                        val now = System.currentTimeMillis()
+                        if (now - lastEmitTime >= 200) {
+                            lastEmitTime = now
+                            emit(DownloadState.Progress(downloadedBytes, totalBytes))
+                        }
                     }
                 }
             }
+            emit(DownloadState.Progress(downloadedBytes, totalBytes))
             if (!partFile.renameTo(destFile)) {
                 partFile.delete()
                 emit(DownloadState.Error("Download failed: could not save model file"))
@@ -74,7 +90,12 @@ class ImageGenModelDownloader @Inject constructor(
                 emit(DownloadState.Error("Download failed: invalid model file"))
                 return@flow
             }
-            emit(DownloadState.Complete(destFile.absolutePath))
+            val extracted = unzipModel(destFile)
+            if (extracted != null) {
+                emit(DownloadState.Complete(extracted))
+            } else {
+                emit(DownloadState.Error("Failed to extract model files"))
+            }
         } catch (e: IOException) {
             partFile.delete()
             emit(DownloadState.Error(e.message ?: "Download failed"))
@@ -85,6 +106,7 @@ class ImageGenModelDownloader @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     fun getModelPath(): String? {
+        if (isExtracted()) return extractedDir.absolutePath
         val file = File(modelDir, ImageGenConstants.MODEL_FILENAME)
         return if (file.exists() && isValidModelFile(file)) file.absolutePath else null
     }
@@ -93,7 +115,52 @@ class ImageGenModelDownloader @Inject constructor(
         if (modelDir.exists()) modelDir.deleteRecursively()
     }
 
+    private fun isExtracted(): Boolean {
+        return extractedDir.exists() && extractedDir.isDirectory &&
+            extractedDir.listFiles()?.isNotEmpty() == true
+    }
+
+    private suspend fun unzipModel(zipFile: File): String? {
+        return try {
+            if (extractedDir.exists()) extractedDir.deleteRecursively()
+            extractedDir.mkdirs()
+            ZipInputStream(zipFile.inputStream()).use { zis ->
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    coroutineContext.ensureActive()
+                    val outFile = File(extractedDir, entry.name)
+                    if (entry.isDirectory) {
+                        outFile.mkdirs()
+                    } else {
+                        outFile.parentFile?.mkdirs()
+                        outFile.outputStream().use { output ->
+                            val buffer = ByteArray(8192)
+                            var len: Int
+                            while (zis.read(buffer).also { len = it } > 0) {
+                                output.write(buffer, 0, len)
+                            }
+                        }
+                    }
+                    zis.closeEntry()
+                    entry = zis.nextEntry
+                }
+            }
+            Log.d(TAG, "Model extracted to ${extractedDir.absolutePath}")
+            extractedDir.listFiles()?.forEach { Log.d(TAG, "  - ${it.name}") }
+            extractedDir.absolutePath
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to unzip model", e)
+            if (extractedDir.exists()) extractedDir.deleteRecursively()
+            null
+        }
+    }
+
     private fun isValidModelFile(file: File): Boolean {
         return file.exists() && file.length() > 0
+    }
+
+    companion object {
+        private const val TAG = "ImageGenModelDownloader"
+        private const val EXTRACTED_DIR_NAME = "extracted"
     }
 }
