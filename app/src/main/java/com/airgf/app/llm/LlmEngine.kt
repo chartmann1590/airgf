@@ -89,12 +89,16 @@ class LlmEngine @Inject constructor(
         activeSession = null
 
         val initialMessages = history.map { message ->
-            val content = if (message.imagePath != null && message.imageDescription != null) {
-                "(shared an image: ${message.imageDescription})"
-            } else if (message.imagePath != null) {
-                "(shared an image)"
-            } else {
-                message.content
+            val content = when {
+                message.imagePath != null && message.isUser -> {
+                    val desc = message.imageDescription ?: "a photo"
+                    val text = message.content.ifBlank { "" }
+                    "[shared an image: $desc]${if (text.isNotBlank()) "\n$text" else ""}"
+                }
+                message.imagePath != null && !message.isUser && message.imageDescription != null -> {
+                    "${message.content}\n(sent an image: ${message.imageDescription})"
+                }
+                else -> message.content
             }
             if (message.isUser) {
                 Message.user(content)

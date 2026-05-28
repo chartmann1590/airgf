@@ -109,7 +109,10 @@ dependencies {
 
     implementation(libs.okhttp)
 
-    implementation(libs.mediapipe.tasks.vision)
+    implementation(libs.mediapipe.tasks.vision) {
+        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+    }
+    implementation("com.google.protobuf:protobuf-java:4.26.1")
 
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)

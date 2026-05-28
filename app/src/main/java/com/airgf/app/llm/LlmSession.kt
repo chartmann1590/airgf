@@ -1,6 +1,7 @@
 ﻿package com.airgf.app.llm
 
 import android.graphics.Bitmap
+import com.airgf.app.core.util.BitmapDescriber
 import com.google.ai.edge.litertlm.Conversation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,16 @@ class LlmSession(
 
     fun sendMessageWithImage(text: String, imageBitmap: Bitmap?): Flow<String> {
         if (imageBitmap == null) return sendMessage(text)
-        return sendMessage("[The user sent an image]\n$text")
+        val description = runCatching { BitmapDescriber.describe(imageBitmap) }
+            .getOrDefault("The user shared a photo.")
+        val prompt = buildString {
+            append("[The user shared a photo with you. $description]")
+            if (text.isNotBlank()) {
+                append("\n")
+                append(text)
+            }
+        }
+        return sendMessage(prompt)
     }
 
     override fun close() {
