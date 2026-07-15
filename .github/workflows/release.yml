@@ -48,8 +48,9 @@ jobs:
           sed -i "s/versionName = \"[^\"]*\"/versionName = \"${{ steps.version.outputs.version_name }}\"/" app/build.gradle.kts
 
       - name: Decode keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/release.jks
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "${GITHUB_WORKSPACE}/release.jks"
 
       - name: Build signed release APK
         env:
