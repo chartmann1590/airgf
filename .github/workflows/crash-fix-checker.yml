@@ -214,7 +214,8 @@ jobs:
                   cmtBody += '| Field | Value |\n|-------|-------|\n';
                   cmtBody += `| **Crash/Bug** | ${parsed.exception || 'Unknown'} |\n`;
                   cmtBody += `| **Blame frame** | \`${parsed.blameFrame}\` |\n`;
-                  cmtBody += `| **Affected files** | ${[...new Set(matchedFiles.map(m => `\`${m.path}\`))].join(', ')} |\n\n`;
+                  const affFiles = [...new Set(matchedFiles.map(m => '`' + m.path + '`'))].join(', ');
+                  cmtBody += `| **Affected files** | ${affFiles} |\n\n`;
 
                   cmtBody += '### Fix Commits\n\n';
                   cmtBody += '| Commit | Date | Message |\n|--------|------|--------|\n';
