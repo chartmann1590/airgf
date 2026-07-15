@@ -8,4 +8,11 @@ data class GfProfile(
     val voiceOption: VoiceOption,
     val spicyModeEnabled: Boolean,
     val customPromptAdditions: String? = null,
+    val presentation: CompanionPresentation = CompanionPresentation.FEMININE,
 )
+
+enum class CompanionPresentation(val relationshipNoun: String) {
+    FEMININE("girlfriend"),
+    MASCULINE("boyfriend"),
+    NEUTRAL("partner"),
+}

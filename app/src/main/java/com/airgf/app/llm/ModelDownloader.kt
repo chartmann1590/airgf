@@ -22,19 +22,19 @@ class ModelDownloader @Inject constructor(
     @ApplicationContext private val context: Context,
     @DownloadOkHttp private val client: OkHttpClient,
 ) {
-    fun download(): Flow<DownloadState> = flow {
-        val destFile = File(context.filesDir, ModelConstants.MODEL_FILENAME)
+    fun download(variant: ModelVariant): Flow<DownloadState> = flow {
+        val destFile = File(context.filesDir, variant.filename)
         if (destFile.exists() && isValidModelFile(destFile)) {
             emit(DownloadState.Complete(destFile.absolutePath))
             return@flow
         }
 
-        val partFile = File(context.filesDir, "${ModelConstants.MODEL_FILENAME}.part")
+        val partFile = File(context.filesDir, "${variant.filename}.part")
         if (partFile.exists()) {
             partFile.delete()
         }
 
-        val request = Request.Builder().url(ModelConstants.MODEL_URL).build()
+        val request = Request.Builder().url(variant.url).build()
 
         try {
             val response = client.newCall(request).execute()
@@ -50,7 +50,7 @@ class ModelDownloader @Inject constructor(
             }
 
             val totalBytes = when (val length = body.contentLength()) {
-                -1L -> ModelConstants.EXPECTED_SIZE_BYTES
+                -1L -> variant.expectedSizeBytes
                 else -> length
             }
             var downloadedBytes = 0L
@@ -90,14 +90,16 @@ class ModelDownloader @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    fun getModelPath(): String? {
-        val file = File(context.filesDir, ModelConstants.MODEL_FILENAME)
+    fun getModelPath(variant: ModelVariant): String? {
+        val file = File(context.filesDir, variant.filename)
         return if (file.exists() && isValidModelFile(file)) file.absolutePath else null
     }
 
     fun deleteModel() {
-        File(context.filesDir, ModelConstants.MODEL_FILENAME).delete()
-        File(context.filesDir, "${ModelConstants.MODEL_FILENAME}.part").delete()
+        ModelVariant.entries.forEach { variant ->
+            File(context.filesDir, variant.filename).delete()
+            File(context.filesDir, "${variant.filename}.part").delete()
+        }
     }
 
     private fun isValidModelFile(file: File): Boolean {

@@ -15,9 +15,11 @@ import com.airgf.app.domain.repository.UserRepository
 import com.airgf.app.domain.usecase.BuildSystemPromptUseCase
 import com.airgf.app.domain.usecase.SendMessageEvent
 import com.airgf.app.domain.usecase.SendMessageUseCase
+import com.airgf.app.domain.usecase.RetrieveMemoriesUseCase
 import com.airgf.app.llm.LlmEngine
 import com.airgf.app.llm.LlmSession
 import com.airgf.app.presentation.components.WaveformStyle
+import com.airgf.app.safety.ContentSafetyPolicy
 import com.airgf.app.speech.SpeechRecognitionError
 import com.airgf.app.speech.SpeechRecognizerManager
 import com.airgf.app.tts.LipSyncBridge
@@ -60,6 +62,7 @@ data class CallUiState(
     val mouthShape: LipSyncBridge.MouthShape = LipSyncBridge.MouthShape.CLOSED,
     val waveformStyle: WaveformStyle = WaveformStyle.SOFT,
     val llmState: LlmEngine.LlmState = LlmEngine.LlmState.Uninitialized,
+    val avatarAction: CharacterAnimationController.AvatarAction = CharacterAnimationController.AvatarAction.IDLE,
 )
 
 @HiltViewModel
@@ -76,6 +79,8 @@ class CallViewModel @Inject constructor(
     private val animationController: CharacterAnimationController,
     private val speechRecognizerManager: SpeechRecognizerManager,
     val avatarAssetRepository: AvatarAssetRepository,
+    private val retrieveMemoriesUseCase: RetrieveMemoriesUseCase,
+    private val contentSafetyPolicy: ContentSafetyPolicy,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CallUiState())
@@ -86,6 +91,7 @@ class CallViewModel @Inject constructor(
     private var callTimerJob: Job? = null
     private var generationJob: Job? = null
     private var listenRetryJob: Job? = null
+    private var visemeJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -104,7 +110,11 @@ class CallViewModel @Inject constructor(
                             waveformStyle = gfProfile?.voiceOption.toWaveformStyle(),
                         )
                     }
-                    gfProfile?.voiceOption?.let(ttsManager::setVoice)
+                    gfProfile?.let { profile ->
+                        ttsManager.setPresentation(profile.presentation)
+                        ttsManager.setAvatar(profile.visualTemplate)
+                        ttsManager.setVoice(profile.voiceOption)
+                    }
                 }
         }
         viewModelScope.launch {
@@ -128,6 +138,11 @@ class CallViewModel @Inject constructor(
         viewModelScope.launch {
             animationController.currentMouthShape.collect { shape ->
                 _state.update { it.copy(mouthShape = shape) }
+            }
+        }
+        viewModelScope.launch {
+            animationController.currentAction.collect { action ->
+                _state.update { it.copy(avatarAction = action) }
             }
         }
         ttsManager.ensureInitialized()
@@ -163,7 +178,7 @@ class CallViewModel @Inject constructor(
             }
             if (!ensureLlmReady()) return@launch
             recreateSession()
-            speakIntroThenListen()
+            generateIntroThenListen()
         }
     }
 
@@ -259,14 +274,25 @@ class CallViewModel @Inject constructor(
 
     private suspend fun recreateSession() {
         runCatching { session?.close() }
-        val systemPrompt = buildSystemPromptUseCase()
+        val memories = retrieveMemoriesUseCase("")
+        val systemPrompt = buildSystemPromptUseCase(memories)
         val history = chatRepository.getRecentMessages(HISTORY_LIMIT).sortedBy { it.timestamp }
         session = llmEngine.createSession(systemPrompt, history)
     }
 
-    private fun speakIntroThenListen() {
-        val name = _state.value.gfProfile?.name ?: "I"
-        speakText("$name is here. Tell me what's on your mind.", listenAfter = true)
+    private suspend fun generateIntroThenListen() {
+        val activeSession = session ?: return
+        val draft = buildString {
+            activeSession.sendMessage(
+                "Open this voice call with a fresh, natural one-sentence greeting. " +
+                    "Do not reuse a stock greeting and do not mention this instruction.",
+            ).collect { append(it) }
+        }
+        if (contentSafetyPolicy.classify(draft).allowed) {
+            speakText(draft, listenAfter = true)
+        } else {
+            startListening()
+        }
     }
 
     private fun startListening() {
@@ -381,7 +407,10 @@ class CallViewModel @Inject constructor(
         ttsManager.speak(
             text = clean,
             onWordStart = { word ->
-                animationController.setMouthShape(lipSyncBridge.getVisemeForWord(word))
+                visemeJob?.cancel()
+                visemeJob = viewModelScope.launch {
+                    lipSyncBridge.animateWord(word, animationController::setMouthShape)
+                }
             },
             onDone = {
                 viewModelScope.launch {
@@ -407,6 +436,7 @@ class CallViewModel @Inject constructor(
 
     override fun onCleared() {
         endCall()
+        visemeJob?.cancel()
         super.onCleared()
     }
 

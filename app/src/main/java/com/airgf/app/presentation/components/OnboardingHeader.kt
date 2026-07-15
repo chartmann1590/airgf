@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,33 +33,49 @@ fun OnboardingHeader(
     modifier: Modifier = Modifier,
     showStepLabel: Boolean = true,
 ) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (onBack != null) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            if (onBack != null) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            } else {
+                Box(modifier = Modifier.size(48.dp))
             }
-        } else {
-            Box(modifier = Modifier.size(48.dp))
+            if (showStepLabel) {
+                Text(
+                    text = "Step ${step.index + 1} of ${OnboardingStep.entries.size}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = OnSurfaceVariant,
+                )
+            } else {
+                Box(modifier = Modifier.size(48.dp))
+            }
         }
 
         Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OnboardingStep.entries.forEach { s ->
                 Box(
                     modifier = Modifier
-                        .size(width = 48.dp, height = 6.dp)
+                        .weight(1f)
+                        .height(6.dp)
                         .clip(CircleShape)
                         .background(
                             if (s.index <= step.index) Primary else SurfaceVariant,
@@ -67,14 +84,5 @@ fun OnboardingHeader(
             }
         }
 
-        if (showStepLabel) {
-            Text(
-                text = "Step ${step.index + 1} of 4",
-                style = MaterialTheme.typography.bodySmall,
-                color = OnSurfaceVariant,
-            )
-        } else {
-            Box(modifier = Modifier.size(48.dp))
-        }
     }
 }

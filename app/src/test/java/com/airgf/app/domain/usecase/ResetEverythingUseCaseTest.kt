@@ -6,6 +6,7 @@ import com.airgf.app.testutil.FakeGfConfigRepository
 import com.airgf.app.testutil.FakeModelRepository
 import com.airgf.app.testutil.FakeProactiveMessageScheduler
 import com.airgf.app.testutil.FakeUserRepository
+import com.airgf.app.testutil.FakeMemoryRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -29,6 +30,7 @@ class ResetEverythingUseCaseTest {
         val modelRepository = FakeModelRepository(modelPath = "/tmp/model.litertlm")
         val scheduler = FakeProactiveMessageScheduler()
         val imageCleanup = FakeImageCleanup()
+        val memoryRepository = FakeMemoryRepository()
 
         ResetEverythingUseCase(
             chatRepository = chatRepository,
@@ -37,6 +39,7 @@ class ResetEverythingUseCaseTest {
             modelRepository = modelRepository,
             proactiveScheduler = scheduler,
             imageStorageUtil = imageCleanup,
+            memoryRepository = memoryRepository,
         )()
 
         assertEquals(1, scheduler.disableCalls)
@@ -44,6 +47,7 @@ class ResetEverythingUseCaseTest {
         assertTrue(gfRepository.deleted)
         assertTrue(userRepository.cleared)
         assertTrue(imageCleanup.cleanupCalled)
+        assertTrue(memoryRepository.deleteAllCalled)
         assertEquals("/tmp/model.litertlm", modelRepository.setModelDownloadedPath)
     }
 
@@ -58,6 +62,7 @@ class ResetEverythingUseCaseTest {
             modelRepository = modelRepository,
             proactiveScheduler = FakeProactiveMessageScheduler(),
             imageStorageUtil = FakeImageCleanup(),
+            memoryRepository = FakeMemoryRepository(),
         )()
 
         assertNull(modelRepository.setModelDownloadedPath)

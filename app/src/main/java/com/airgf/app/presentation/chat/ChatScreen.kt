@@ -57,6 +57,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -80,6 +82,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.airgf.app.ads.BannerAdView
 import com.airgf.app.core.navigation.Route
 import com.airgf.app.domain.model.Message
 import com.airgf.app.llm.LlmEngine
@@ -117,6 +120,7 @@ fun ChatScreen(
     val isKeyboardOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     var isInputFocused by remember { mutableStateOf(false) }
     var previewImagePath by remember { mutableStateOf<String?>(null) }
+    var pendingReport by remember { mutableStateOf<Message?>(null) }
 
     val pickMediaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -153,6 +157,23 @@ fun ChatScreen(
         if (itemCount > 0 && (isKeyboardOpen || isInputFocused)) {
             listState.animateScrollToItem(itemCount - 1)
         }
+    }
+
+    pendingReport?.let { message ->
+        AlertDialog(
+            onDismissRequest = { pendingReport = null },
+            title = { Text("Report AI response?") },
+            text = { Text("Only this response and up to two preceding messages will be included after you confirm.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.reportMessage(message)
+                    pendingReport = null
+                }) { Text("Report") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingReport = null }) { Text("Cancel") }
+            },
+        )
     }
 
     GradientBackground(showRadialGlow = true) {
@@ -209,7 +230,6 @@ fun ChatScreen(
                     ChatInputBar(
                         inputText = uiState.inputText,
                         isGenerating = uiState.isGenerating,
-                        spicyModeEnabled = uiState.gfProfile?.spicyModeEnabled == true,
                         onInputChange = viewModel::onInputChange,
                         onInputFocusChanged = { isInputFocused = it },
                         onSend = viewModel::sendMessage,
@@ -220,11 +240,13 @@ fun ChatScreen(
                                 )
                             }
                         },
-                        onToggleSpicy = viewModel::toggleSpicyMode,
                         onAttachImage = viewModel::toggleAttachmentOptions,
                         hasPendingImage = uiState.pendingImageUri != null,
                     )
                     if (!isKeyboardOpen) {
+                        if (!uiState.isSubscribed) {
+                            BannerAdView(canRequestAds = viewModel.canRequestAds)
+                        }
                         MainBottomNav(
                             currentRoute = Route.Chat,
                             onNavigate = { route ->
@@ -262,7 +284,7 @@ fun ChatScreen(
                     }
                     else -> {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            if (uiState.gfProfile?.spicyModeEnabled == true) {
+                            if (uiState.spicyModeActive) {
                                 SpicyModeBanner()
                             }
 
@@ -297,6 +319,7 @@ fun ChatScreen(
                                         showAvatar = showAvatar,
                                         modifier = Modifier.padding(vertical = 4.dp),
                                         onImageClick = { previewImagePath = it },
+                                        onReport = { pendingReport = it },
                                     )
                                 }
 
@@ -569,12 +592,10 @@ private fun AttachmentOptionsSheet(
 private fun ChatInputBar(
     inputText: String,
     isGenerating: Boolean,
-    spicyModeEnabled: Boolean,
     onInputChange: (String) -> Unit,
     onInputFocusChanged: (Boolean) -> Unit,
     onSend: () -> Unit,
     onVoiceInputClick: () -> Unit,
-    onToggleSpicy: () -> Unit,
     onAttachImage: () -> Unit,
     hasPendingImage: Boolean,
 ) {
@@ -591,18 +612,6 @@ private fun ChatInputBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            IconButton(onClick = onToggleSpicy) {
-                Icon(
-                    imageVector = if (spicyModeEnabled) {
-                        Icons.Filled.LocalFireDepartment
-                    } else {
-                        Icons.Outlined.LocalFireDepartment
-                    },
-                    contentDescription = "Toggle spicy mode",
-                    tint = if (spicyModeEnabled) UserBubbleEnd else OnSurfaceVariant,
-                )
-            }
-
             IconButton(onClick = onAttachImage) {
                 Icon(
                     Icons.Outlined.Image,

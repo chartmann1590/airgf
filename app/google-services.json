@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "150846226691",
+    "project_id": "airgf-companion",
+    "storage_bucket": "airgf-companion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150846226691:android:19e21b60756474b04aa936",
+        "android_client_info": {
+          "package_name": "com.airgf.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeCEMlg1b8spDwNqaoerwNDi001GyYFRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

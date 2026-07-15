@@ -1,17 +1,19 @@
 ﻿package com.airgf.app.llm
 
 import android.graphics.Bitmap
-import android.util.Log
-import com.airgf.app.core.util.BitmapDescriber
 import com.google.ai.edge.litertlm.Conversation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.util.concurrent.atomic.AtomicBoolean
 
 class LlmSession(
     private val conversation: Conversation,
+    private val imageDescriptionService: ImageDescriptionService,
+    private val onClosed: (() -> Unit)? = null,
 ) : AutoCloseable {
     private val isClosed = AtomicBoolean(false)
 
@@ -20,19 +22,25 @@ class LlmSession(
             .map { chunk -> chunk.toString() }
             .flowOn(Dispatchers.IO)
 
-    fun sendMessageWithImage(text: String, imageBitmap: Bitmap?): Flow<String> {
-        if (imageBitmap == null) return sendMessage(text)
-        val description = runCatching { BitmapDescriber.describe(imageBitmap) }
-            .getOrDefault("The user shared a photo.")
+    fun sendMessageWithImage(text: String, imageBitmap: Bitmap?): Flow<String> = flow {
+        if (imageBitmap == null) {
+            emitAll(sendMessage(text))
+            return@flow
+        }
+        val description = imageDescriptionService.describe(imageBitmap)
         val prompt = buildString {
-            append("[The user shared a photo with you. $description]")
+            if (description != null) {
+                append("[The user shared a photo. On-device image analysis: $description]")
+            } else {
+                append("[The user shared a photo, but image analysis is unavailable on this device. " +
+                    "Do not pretend to see details; respond naturally and ask what they want to share about it.]")
+            }
             if (text.isNotBlank()) {
                 append("\n")
                 append(text)
             }
         }
-        Log.d("LlmSession", "Sending image message: $prompt")
-        return sendMessage(prompt)
+        emitAll(sendMessage(prompt))
     }
 
     override fun close() {
@@ -40,6 +48,7 @@ class LlmSession(
             runCatching {
                 conversation.close()
             }
+            onClosed?.invoke()
         }
     }
 }

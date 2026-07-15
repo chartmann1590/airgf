@@ -83,7 +83,7 @@ fun VoiceSelectionScreen(
                     .padding(horizontal = 20.dp),
             ) {
                 Text(
-                    text = "Choose Her Voice",
+                    text = "Choose Their Voice",
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -91,7 +91,7 @@ fun VoiceSelectionScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "How should she sound when she speaks?",
+                    text = "How should your companion sound?",
                     style = MaterialTheme.typography.bodyMedium,
                     color = OnSurfaceVariant,
                     textAlign = TextAlign.Center,

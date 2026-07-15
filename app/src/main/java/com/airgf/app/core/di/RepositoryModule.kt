@@ -7,11 +7,15 @@ import com.airgf.app.data.repository.GfConfigRepositoryImpl
 import com.airgf.app.data.repository.ImageGenRepositoryImpl
 import com.airgf.app.data.repository.ModelRepositoryImpl
 import com.airgf.app.data.repository.UserRepositoryImpl
+import com.airgf.app.data.repository.MemoryRepositoryImpl
+import com.airgf.app.data.repository.SubscriptionRepositoryImpl
 import com.airgf.app.domain.repository.ChatRepository
 import com.airgf.app.domain.repository.GfConfigRepository
 import com.airgf.app.domain.repository.ImageGenRepository
 import com.airgf.app.domain.repository.ModelRepository
 import com.airgf.app.domain.repository.UserRepository
+import com.airgf.app.domain.repository.MemoryRepository
+import com.airgf.app.domain.repository.SubscriptionRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -45,4 +49,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindImageCleanup(impl: ImageStorageUtil): ImageCleanup
+
+    @Binds
+    @Singleton
+    abstract fun bindMemoryRepository(impl: MemoryRepositoryImpl): MemoryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSubscriptionRepository(impl: SubscriptionRepositoryImpl): SubscriptionRepository
 }

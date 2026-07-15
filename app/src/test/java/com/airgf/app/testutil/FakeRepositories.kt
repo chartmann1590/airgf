@@ -10,7 +10,13 @@ import com.airgf.app.domain.repository.GfConfigRepository
 import com.airgf.app.domain.repository.ImageGenRepository
 import com.airgf.app.domain.repository.ModelRepository
 import com.airgf.app.domain.repository.UserRepository
+import com.airgf.app.domain.repository.MemoryRepository
+import com.airgf.app.domain.model.CompanionMemory
+import com.airgf.app.domain.model.MemoryState
+import com.airgf.app.domain.repository.SubscriptionRepository
 import com.airgf.app.notification.ProactiveMessageScheduler
+import com.airgf.app.llm.ModelVariant
+import com.android.billingclient.api.ProductDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -141,6 +147,7 @@ class FakeChatRepository(
 class FakeModelRepository(
     private var modelPath: String? = null,
 ) : ModelRepository {
+    private val variantState = MutableStateFlow(ModelVariant.E2B)
     var clearModelCalled = false
     var setModelDownloadedPath: String? = null
 
@@ -163,6 +170,9 @@ class FakeModelRepository(
     override fun hasSufficientStorage(): Boolean = true
 
     override fun downloadModel(): Flow<DownloadState> = flowOf(DownloadState.Idle)
+    override fun selectedVariantFlow(): Flow<ModelVariant> = variantState
+    override suspend fun getSelectedVariant(): ModelVariant = variantState.value
+    override suspend fun setSelectedVariant(variant: ModelVariant) { variantState.value = variant }
 }
 
 class FakeImageGenRepository(
@@ -187,5 +197,45 @@ class FakeProactiveMessageScheduler : ProactiveMessageScheduler {
 
     override fun disable() {
         disableCalls++
+    }
+}
+
+class FakeSubscriptionRepository(
+    isSubscribed: Boolean = false,
+    spicyModeGrantedUntil: Long? = null,
+) : SubscriptionRepository {
+    private val isSubscribedState = MutableStateFlow(isSubscribed)
+    private val grantedUntilState = MutableStateFlow(spicyModeGrantedUntil)
+    private val creditMinutesRemainingState = MutableStateFlow(240)
+
+    override fun isSubscribedFlow(): Flow<Boolean> = isSubscribedState
+    override suspend fun isSubscribed(): Boolean = isSubscribedState.value
+    override fun spicyModeGrantedUntilFlow(): Flow<Long?> = grantedUntilState
+    override fun spicyCreditMinutesRemainingTodayFlow(): Flow<Int> = creditMinutesRemainingState
+    override suspend fun grantSpicyModeCreditMinutes(minutes: Int) {
+        grantedUntilState.value = System.currentTimeMillis() + minutes * 60_000L
+        creditMinutesRemainingState.value = (creditMinutesRemainingState.value - minutes).coerceAtLeast(0)
+    }
+    override fun subscriptionProductDetailsFlow(): Flow<ProductDetails?> = flowOf(null)
+    override fun launchPurchaseFlow(activity: android.app.Activity) {}
+}
+
+class FakeMemoryRepository : MemoryRepository {
+    private val memories = MutableStateFlow<List<CompanionMemory>>(emptyList())
+    var deleteAllCalled = false
+
+    override fun observeMemories(): Flow<List<CompanionMemory>> = memories
+    override suspend fun getApproved(): List<CompanionMemory> = memories.value.filter { it.state == MemoryState.APPROVED }
+    override suspend fun suggest(memory: CompanionMemory): Long {
+        val id = (memories.value.maxOfOrNull { it.id } ?: 0) + 1
+        memories.value = memories.value + memory.copy(id = id)
+        return id
+    }
+    override suspend fun setState(id: Long, state: MemoryState) {
+        memories.value = memories.value.map { if (it.id == id) it.copy(state = state) else it }
+    }
+    override suspend fun deleteAll() {
+        deleteAllCalled = true
+        memories.value = emptyList()
     }
 }

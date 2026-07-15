@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airgf.app.domain.model.PersonalityTrait
 import com.airgf.app.domain.model.RelationshipType
 import com.airgf.app.domain.model.VisualTemplate
+import com.airgf.app.domain.model.CompanionPresentation
 import com.airgf.app.presentation.components.AvatarModelPreview
 import com.airgf.app.presentation.components.GlassPanel
 import com.airgf.app.presentation.components.GlowButton
@@ -72,7 +73,7 @@ fun GfCustomizationScreen(
             ) {
                 item {
                     Text(
-                        text = "Create Your Perfect Girl",
+                        text = "Create Your Companion",
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -80,7 +81,7 @@ fun GfCustomizationScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Choose her look, personality & style",
+                        text = "Choose their role, look, personality, and style",
                         style = MaterialTheme.typography.bodyLarge,
                         color = OnSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -88,7 +89,26 @@ fun GfCustomizationScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "HER NAME",
+                        text = "COMPANION ROLE",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = OnSurfaceVariant,
+                        modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    )
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CompanionPresentation.entries.forEach { presentation ->
+                            SelectableChip(
+                                label = presentation.relationshipNoun.replaceFirstChar { it.uppercase() },
+                                selected = state.companionPresentation == presentation,
+                                onClick = { viewModel.updateCompanionPresentation(presentation) },
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "COMPANION NAME",
                         style = MaterialTheme.typography.labelMedium,
                         color = OnSurfaceVariant,
                         modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
@@ -125,7 +145,7 @@ fun GfCustomizationScreen(
                     )
                 }
                 item {
-                    val templates = VisualTemplate.entries.toList()
+                    val templates = VisualTemplate.entries.filter { it.supports(state.companionPresentation) }
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {

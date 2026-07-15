@@ -46,13 +46,13 @@ def look_at(obj, target):
     obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
 
-def setup_scene(min_corner, max_corner):
+def setup_scene(min_corner, max_corner, full_body=False):
     center = (min_corner + max_corner) * 0.5
     size = max_corner - min_corner
     height = max(size.z, 0.01)
     depth = max(size.y, 0.01)
 
-    target = Vector((center.x, center.y, min_corner.z + height * 0.79))
+    target = center if full_body else Vector((center.x, center.y, min_corner.z + height * 0.79))
     camera_distance = max(height * 1.8, depth * 2.6, 2.0)
     camera_location = Vector((center.x, min_corner.y - camera_distance, target.z))
 
@@ -62,7 +62,7 @@ def setup_scene(min_corner, max_corner):
     camera.location = camera_location
     look_at(camera, target)
     camera_data.type = "ORTHO"
-    camera_data.ortho_scale = height * 0.42
+    camera_data.ortho_scale = height * (1.08 if full_body else 0.42)
     bpy.context.scene.camera = camera
 
     key_data = bpy.data.lights.new("KeyLight", "AREA")
@@ -86,23 +86,22 @@ def setup_scene(min_corner, max_corner):
     sun_data.energy = 1.2
 
 
-def render_thumbnail(model_path, output_path):
+def render_thumbnail(model_path, output_path, full_body=False):
     reset_scene()
     bpy.ops.import_scene.gltf(filepath=str(model_path))
     bpy.context.scene.frame_set(0)
     min_corner, max_corner = mesh_bounds()
-    setup_scene(min_corner, max_corner)
+    setup_scene(min_corner, max_corner, full_body)
 
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
-    scene.eevee.taa_render_samples = 64
     scene.render.resolution_x = 512
     scene.render.resolution_y = 512
     scene.render.film_transparent = False
     scene.world = scene.world or bpy.data.worlds.new("World")
     scene.world.color = (0.12, 0.12, 0.14)
-    scene.view_settings.view_transform = "Filmic"
-    scene.view_settings.look = "Medium High Contrast"
+    scene.view_settings.view_transform = "AgX"
+    scene.view_settings.look = "AgX - Medium High Contrast"
     scene.view_settings.exposure = 0
     scene.view_settings.gamma = 1
     scene.render.image_settings.file_format = "WEBP"
@@ -114,8 +113,14 @@ def render_thumbnail(model_path, output_path):
 
 def main():
     if "--" not in sys.argv:
-        raise SystemExit("Usage: blender --background --python tools/render_avatar_thumbnails.py -- <models_dir>")
+        raise SystemExit(
+            "Usage: blender --background --python tools/render_avatar_thumbnails.py -- "
+            "<models_dir> OR <model.glb> <output.webp>"
+        )
     args = sys.argv[sys.argv.index("--") + 1 :]
+    if len(args) in (2, 3):
+        render_thumbnail(Path(args[0]).resolve(), Path(args[1]).resolve(), len(args) == 3 and args[2] == "full")
+        return
     models_dir = Path(args[0]).resolve()
 
     for model_name, thumbnail_name in THUMBNAILS.items():

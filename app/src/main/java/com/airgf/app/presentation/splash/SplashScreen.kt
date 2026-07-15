@@ -9,8 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.airgf.app.ads.findActivity
 import com.airgf.app.presentation.theme.Primary
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 @Composable
 fun SplashScreen(
@@ -18,6 +21,8 @@ fun SplashScreen(
     onNavigateToChat: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -28,6 +33,20 @@ fun SplashScreen(
     }
 
     LaunchedEffect(Unit) {
+        val activity = context.findActivity()
+        if (activity != null) {
+            suspendCancellableCoroutine<Unit> { continuation ->
+                viewModel.consentManager.requestConsentAndLoadForm(activity) {
+                    if (continuation.isActive) continuation.resumeWith(Result.success(Unit))
+                }
+            }
+            if (viewModel.consentManager.canRequestAds) {
+                viewModel.ensureAdsInitialized()
+                viewModel.interstitialAdManager.preload(activity)
+                viewModel.rewardedAdManager.preload(activity)
+            }
+        }
+
         val complete = viewModel.userRepository.isOnboardingComplete()
         if (complete) {
             onNavigateToChat()

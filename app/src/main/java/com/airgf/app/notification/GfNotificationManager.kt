@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.airgf.app.MainActivity
@@ -43,28 +45,34 @@ class GfNotificationManager @Inject constructor(
             .setContentIntent(pendingIntent)
             .build()
 
-        NotificationManagerCompat.from(context).notify(nextNotificationId(), notification)
-        return true
+        return try {
+            NotificationManagerCompat.from(context).notify(nextNotificationId(), notification)
+            true
+        } catch (_: SecurityException) {
+            false
+        }
     }
 
     private fun ensureChannel() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-
         val systemNotificationManager = context.getSystemService(NotificationManager::class.java) ?: return
         if (systemNotificationManager.getNotificationChannel(CHANNEL_ID) != null) return
 
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Girlfriend messages",
+            "Companion messages",
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "Proactive messages from your AI girlfriend"
+            description = "Proactive messages from your AI companion"
         }
         systemNotificationManager.createNotificationChannel(channel)
     }
 
     private fun canPostNotifications(): Boolean =
-        context.hasNotificationPermission()
+        context.hasNotificationPermission() &&
+            ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
 
     private fun nextNotificationId(): Int =
         (System.currentTimeMillis() % Int.MAX_VALUE).toInt()

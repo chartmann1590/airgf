@@ -24,3 +24,19 @@
 # OkHttp - keep platform adapters used via reflection.
 -dontwarn okhttp3.internal.platform.**
 -keep class okhttp3.internal.platform.** { *; }
+
+# Firebase Crashlytics / Performance / Analytics - preserve stack traces and SDK classes.
+-keepattributes SourceFile,LineNumberTable
+-keepattributes *Annotation*
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# Play Billing Library uses a different package prefix than GMS.
+-keep class com.android.billingclient.** { *; }
+-dontwarn com.android.billingclient.**
+
+# UMP (User Messaging Platform) consent SDK.
+-keep class com.google.android.ump.** { *; }
+-dontwarn com.google.android.ump.**

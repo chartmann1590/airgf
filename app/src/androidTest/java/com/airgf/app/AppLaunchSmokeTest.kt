@@ -56,7 +56,7 @@ class AppLaunchSmokeTest {
             GfConfigRepositoryImpl(database.gfConfigDao()).saveProfile(
                 GfProfile(
                     name = "Mina",
-                    visualTemplate = VisualTemplate.ANIME_CUTE,
+                    visualTemplate = VisualTemplate.MAYA,
                     personalityTraits = listOf(PersonalityTrait.ROMANTIC, PersonalityTrait.PLAYFUL),
                     relationshipType = RelationshipType.ROMANTIC,
                     voiceOption = VoiceOption.SOFT,

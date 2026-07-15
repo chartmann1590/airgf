@@ -8,10 +8,12 @@ import com.airgf.app.data.model.DownloadState
 import com.airgf.app.domain.repository.ModelRepository
 import com.airgf.app.llm.ModelConstants
 import com.airgf.app.llm.ModelDownloader
+import com.airgf.app.llm.ModelVariant
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,6 +24,7 @@ class ModelRepositoryImpl @Inject constructor(
     private val userPreferences: UserPreferences,
     private val modelDownloader: ModelDownloader,
 ) : ModelRepository {
+    @Volatile private var selectedVariant: ModelVariant = ModelVariant.E2B
 
     override suspend fun isModelDownloaded(): Boolean {
         val path = getModelPath()
@@ -33,7 +36,7 @@ class ModelRepositoryImpl @Inject constructor(
         if (storedPath != null && File(storedPath).exists()) {
             return storedPath
         }
-        return modelDownloader.getModelPath()
+        return modelDownloader.getModelPath(getSelectedVariant())
     }
 
     override suspend fun setModelDownloaded(path: String) {
@@ -48,14 +51,21 @@ class ModelRepositoryImpl @Inject constructor(
     override fun isNetworkAvailable(): Boolean = NetworkUtil.isNetworkAvailable(context)
 
     override fun hasSufficientStorage(): Boolean =
-        StorageUtil.hasMinimumFreeSpace(context, ModelConstants.MIN_FREE_SPACE_BYTES)
+        StorageUtil.hasMinimumFreeSpace(context, selectedVariant.minimumFreeSpaceBytes)
 
     override fun downloadModel(): Flow<DownloadState> = flow {
-        modelDownloader.download().collect { state ->
+        modelDownloader.download(getSelectedVariant()).collect { state ->
             if (state is DownloadState.Complete) {
                 setModelDownloaded(state.filePath)
             }
             emit(state)
         }
+    }
+
+    override fun selectedVariantFlow(): Flow<ModelVariant> = userPreferences.modelVariant.onEach { selectedVariant = it }
+    override suspend fun getSelectedVariant(): ModelVariant = userPreferences.modelVariant.first().also { selectedVariant = it }
+    override suspend fun setSelectedVariant(variant: ModelVariant) {
+        selectedVariant = variant
+        userPreferences.setModelVariant(variant)
     }
 }

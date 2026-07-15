@@ -5,6 +5,8 @@
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -15,8 +17,8 @@ android {
         applicationId = "com.airgf.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.0.4"
+        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 5
+        versionName = System.getenv("ANDROID_VERSION_NAME") ?: "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val reportEndpoint = System.getenv("AIRGF_REPORT_ENDPOINT").orEmpty()
@@ -77,6 +79,33 @@ android {
         buildConfigField("String", "GITHUB_REPO_OWNER", "\"$ghOwner\"")
         buildConfigField("String", "GITHUB_REPO_NAME", "\"$ghRepo\"")
         buildConfigField("String", "FEEDBACK_ASSETS_DIR", "\"feedback-assets\"")
+
+        fun resolveSecret(envKey: String, propsKey: String): String {
+            val fromEnv = System.getenv(envKey) ?: ""
+            if (fromEnv.isNotEmpty()) return fromEnv
+            val propsFile = rootProject.file("local.properties")
+            var value = ""
+            if (propsFile.exists()) {
+                propsFile.forEachLine { line ->
+                    val trimmed = line.trim()
+                    if (trimmed.startsWith("$propsKey=")) {
+                        value = trimmed.removePrefix("$propsKey=").trim()
+                    }
+                }
+            }
+            return value
+        }
+
+        val admobAppId = resolveSecret("ADMOB_APP_ID", "admob.app.id")
+        val admobBannerUnitId = resolveSecret("ADMOB_BANNER_UNIT_ID", "admob.banner.unit.id")
+        val admobInterstitialUnitId = resolveSecret("ADMOB_INTERSTITIAL_UNIT_ID", "admob.interstitial.unit.id")
+        val admobRewardedUnitId = resolveSecret("ADMOB_REWARDED_UNIT_ID", "admob.rewarded.unit.id")
+
+        buildConfigField("String", "ADMOB_BANNER_UNIT_ID", "\"$admobBannerUnitId\"")
+        buildConfigField("String", "ADMOB_INTERSTITIAL_UNIT_ID", "\"$admobInterstitialUnitId\"")
+        buildConfigField("String", "ADMOB_REWARDED_UNIT_ID", "\"$admobRewardedUnitId\"")
+
+        manifestPlaceholders["admobAppId"] = admobAppId
     }
 
     signingConfigs {
@@ -136,6 +165,11 @@ ksp {
     arg("room.generateKotlin", "true")
 }
 
+configurations.all {
+    exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+    exclude(group = "com.google.firebase", module = "protolite-well-known-types")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -193,6 +227,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.perf)
+    implementation(libs.firebase.analytics)
+
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
+    implementation(libs.billing.ktx)
 
     testImplementation(libs.junit4)
 

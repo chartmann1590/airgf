@@ -6,6 +6,8 @@ import com.airgf.app.data.local.db.AppDatabase
 import com.airgf.app.data.local.db.dao.ConversationDao
 import com.airgf.app.data.local.db.dao.GfConfigDao
 import com.airgf.app.data.local.db.dao.MessageDao
+import com.airgf.app.data.local.db.dao.CompanionMemoryDao
+import com.airgf.app.data.local.db.dao.AiReportDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,7 +28,7 @@ object AppModule {
             context,
             AppDatabase::class.java,
             "airgf.db",
-        ).addMigrations(AppDatabase.MIGRATION_1_2).build()
+        ).addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3).build()
 
     @Provides
     fun provideMessageDao(database: AppDatabase): MessageDao = database.messageDao()
@@ -36,6 +38,9 @@ object AppModule {
 
     @Provides
     fun provideGfConfigDao(database: AppDatabase): GfConfigDao = database.gfConfigDao()
+
+    @Provides fun provideCompanionMemoryDao(database: AppDatabase): CompanionMemoryDao = database.companionMemoryDao()
+    @Provides fun provideAiReportDao(database: AppDatabase): AiReportDao = database.aiReportDao()
 
     @Provides
     @Singleton

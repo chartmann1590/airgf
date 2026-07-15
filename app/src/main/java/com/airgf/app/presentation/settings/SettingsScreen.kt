@@ -77,6 +77,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.airgf.app.ads.BannerAdView
+import com.airgf.app.ads.findActivity
 import com.airgf.app.core.navigation.Route
 import com.airgf.app.domain.model.PersonalityTrait
 import com.airgf.app.domain.model.VisualTemplate
@@ -166,8 +168,34 @@ fun SettingsScreen(
                         launchSingleTop = true
                     }
                 }
+                SettingsEvent.LaunchSubscriptionPurchase -> {
+                    context.findActivity()?.let { viewModel.launchSubscriptionPurchase(it) }
+                }
+                SettingsEvent.LaunchRewardedAd -> {
+                    val activity = context.findActivity()
+                    if (activity != null && viewModel.rewardedAdManager.isReady) {
+                        viewModel.rewardedAdManager.show(
+                            activity = activity,
+                            onEarnedReward = { viewModel.onRewardedAdEarned() },
+                            onClosed = {},
+                            onNotReady = {
+                                scope.launch { snackbarHostState.showSnackbar("Ad not ready yet - try again in a moment.") }
+                            },
+                        )
+                    } else {
+                        activity?.let { viewModel.rewardedAdManager.preload(it) }
+                        scope.launch { snackbarHostState.showSnackbar("Ad not ready yet - try again in a moment.") }
+                    }
+                }
+                SettingsEvent.OpenPrivacyOptions -> {
+                    context.findActivity()?.let { viewModel.consentManager.showPrivacyOptionsForm(it) }
+                }
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        context.findActivity()?.let { viewModel.rewardedAdManager.preload(it) }
     }
 
     if (confirmSpicyMode) {
@@ -182,6 +210,33 @@ fun SettingsScreen(
                 }) { Text("I am 18+ - Enable") }
             },
             dismissButton = { TextButton(onClick = { confirmSpicyMode = false }) { Text("Cancel") } },
+        )
+    }
+
+    if (uiState.showPaywall) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissPaywall,
+            title = { Text("Unlock Spicy Mode") },
+            text = {
+                Text(
+                    "Spicy Mode is off by default. Subscribe for permanent access and ad-free Amoura, " +
+                        "or watch a rewarded ad for +15 min (up to ${uiState.spicyCreditMinutesRemainingToday} min left today).",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::requestSubscribe) {
+                    Text(uiState.subscriptionPriceLabel?.let { "Subscribe - $it" } ?: "Subscribe")
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(
+                        onClick = viewModel::requestWatchRewardedAd,
+                        enabled = uiState.spicyCreditMinutesRemainingToday > 0,
+                    ) { Text("Watch ad (+15 min)") }
+                    TextButton(onClick = viewModel::dismissPaywall) { Text("Cancel") }
+                }
+            },
         )
     }
 
@@ -254,16 +309,21 @@ fun SettingsScreen(
                 SettingsTopBar()
             },
             bottomBar = {
-                MainBottomNav(
-                    currentRoute = Route.Settings,
-                    onNavigate = { route ->
-                        if (route != Route.Settings) {
-                            navController.navigate(route.path) {
-                                launchSingleTop = true
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (!uiState.isSubscribed) {
+                        BannerAdView(canRequestAds = viewModel.consentManager.canRequestAds)
+                    }
+                    MainBottomNav(
+                        currentRoute = Route.Settings,
+                        onNavigate = { route ->
+                            if (route != Route.Settings) {
+                                navController.navigate(route.path) {
+                                    launchSingleTop = true
+                                }
                             }
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             },
         ) { paddingValues ->
             if (uiState.isLoading) {
@@ -350,11 +410,53 @@ fun SettingsScreen(
                             )
                             SettingsToggleRow(
                                 title = "Spicy Mode",
-                                subtitle = "Adult flirting and mild innuendo. Explicit content stays blocked.",
-                                checked = uiState.gfProfile?.spicyModeEnabled == true,
+                                subtitle = spicyModeSubtitle(uiState),
+                                checked = uiState.spicyModeActive,
                                 onCheckedChange = { enabled ->
                                     if (enabled) confirmSpicyMode = true else viewModel.setSpicyMode(false)
                                 },
+                            )
+                        }
+                    }
+
+                    item {
+                        SettingsSection(
+                            title = "Subscription & Ads",
+                            icon = Icons.Default.AutoAwesome,
+                        ) {
+                            Text(
+                                text = "Spicy Mode is off by default. Unlock it permanently with a " +
+                                    "subscription (also removes all ads), or temporarily by watching " +
+                                    "ads - up to 4 hours a day.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = OnSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                            SettingsRow(
+                                title = if (uiState.isSubscribed) "Subscribed" else "Subscribe",
+                                subtitle = if (uiState.isSubscribed) {
+                                    "Spicy Mode unlocked, ads removed."
+                                } else {
+                                    "Permanent Spicy Mode + no ads" +
+                                        (uiState.subscriptionPriceLabel?.let { " - $it" } ?: "")
+                                },
+                                onClick = { if (!uiState.isSubscribed) viewModel.requestSubscribe() },
+                            )
+                            SettingsRow(
+                                title = "Watch ad for +15 min",
+                                subtitle = if (uiState.spicyCreditMinutesRemainingToday > 0) {
+                                    "${uiState.spicyCreditMinutesRemainingToday} min of credit left today"
+                                } else {
+                                    "Daily limit reached - resets at midnight"
+                                },
+                                onClick = {
+                                    if (uiState.spicyCreditMinutesRemainingToday > 0) viewModel.requestWatchRewardedAd()
+                                },
+                            )
+                            SettingsRow(
+                                title = "Privacy Options",
+                                subtitle = "Manage ad personalization consent",
+                                onClick = viewModel::openPrivacyOptions,
                             )
                         }
                     }
@@ -1514,6 +1616,16 @@ private fun imageModelStatusText(status: SettingsImageModelStatus): String = whe
     SettingsImageModelStatus.Checking -> "Checking image model..."
     SettingsImageModelStatus.NotDownloaded -> "Not downloaded"
     is SettingsImageModelStatus.Downloaded -> "Downloaded (${status.sizeLabel})"
+}
+
+private fun spicyModeSubtitle(uiState: SettingsUiState): String = when {
+    uiState.isSubscribed && uiState.spicyModeActive -> "On (subscribed)"
+    uiState.spicyModeActive && uiState.spicyModeGrantedUntil != null -> {
+        val remainingMs = uiState.spicyModeGrantedUntil - System.currentTimeMillis()
+        val remainingMinutes = (remainingMs / 60_000L).coerceAtLeast(0)
+        "Active via ad credit - ~$remainingMinutes min left"
+    }
+    else -> "Off by default. Subscribe or watch an ad to unlock."
 }
 
 @Composable

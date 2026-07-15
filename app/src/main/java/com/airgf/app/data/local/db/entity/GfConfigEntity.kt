@@ -13,4 +13,5 @@ data class GfConfigEntity(
     val voiceOption: String,
     val spicyModeEnabled: Boolean,
     val customPromptAdditions: String?,
+    val presentation: String = "FEMININE",
 )

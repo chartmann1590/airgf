@@ -8,7 +8,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material3.Icon
@@ -47,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.airgf.app.ads.BannerAdView
 import com.airgf.app.core.navigation.Route
 import com.airgf.app.presentation.components.AvatarRenderer
 import com.airgf.app.presentation.components.GlassPanel
@@ -84,14 +84,19 @@ fun CharacterScreen(
             containerColor = Color.Transparent,
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
-                MainBottomNav(
-                    currentRoute = Route.Character,
-                    onNavigate = { route ->
-                        if (route != Route.Character) {
-                            navController.navigate(route.path) { launchSingleTop = true }
-                        }
-                    },
-                )
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (!uiState.isSubscribed) {
+                        BannerAdView(canRequestAds = viewModel.canRequestAds)
+                    }
+                    MainBottomNav(
+                        currentRoute = Route.Character,
+                        onNavigate = { route ->
+                            if (route != Route.Character) {
+                                navController.navigate(route.path) { launchSingleTop = true }
+                            }
+                        },
+                    )
+                }
             },
         ) { padding ->
             Column(
@@ -112,21 +117,7 @@ fun CharacterScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .padding(horizontal = 16.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .border(
-                            width = if (uiState.isSpeaking) 2.dp else 1.dp,
-                            brush = Brush.verticalGradient(
-                                if (uiState.isSpeaking) {
-                                    listOf(PrimaryContainer.copy(alpha = 0.8f), Primary.copy(alpha = 0.4f))
-                                } else {
-                                    listOf(OnSurfaceVariant.copy(alpha = 0.3f), Color.Transparent)
-                                },
-                            ),
-                            shape = RoundedCornerShape(24.dp),
-                        )
-                        .clickable { viewModel.tapToTalk() },
+                        .weight(1f),
                     contentAlignment = Alignment.Center,
                 ) {
                     AvatarRenderer(
@@ -135,9 +126,9 @@ fun CharacterScreen(
                         mouthShape = uiState.mouthShape,
                         assetRepository = viewModel.avatarAssetRepository,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(24.dp)),
-                        environmentAssetPath = BEDROOM_ENVIRONMENT_PATH,
+                            .fillMaxSize(),
+                        environmentAssetPath = null,
+                        action = uiState.action,
                     )
 
                     // Bottom gradient for text readability
@@ -241,12 +232,12 @@ fun CharacterScreen(
                     QuickActionButton(
                         icon = {
                             Icon(
-                                Icons.Filled.LocalFireDepartment,
-                                contentDescription = "Spicy",
-                                tint = if (uiState.gfProfile?.spicyModeEnabled == true) PrimaryContainer else Color(0xFFFF6B6B),
+                                Icons.Filled.MusicNote,
+                                contentDescription = "Dance",
+                                tint = PrimaryContainer,
                             )
                         },
-                        onClick = viewModel::toggleSpicyMode,
+                        onClick = viewModel::dance,
                     )
                 }
 
@@ -255,7 +246,6 @@ fun CharacterScreen(
                     text = if (uiState.isSpeaking) "Tap to stop" else "Tap to talk",
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = MaterialTheme.typography.labelMedium.letterSpacing * 2,
                     ),
                     color = OnSurfaceVariant.copy(alpha = hintAlpha),
                     textAlign = TextAlign.Center,
@@ -265,8 +255,6 @@ fun CharacterScreen(
         }
     }
 }
-
-private const val BEDROOM_ENVIRONMENT_PATH = "models/bedroom_interior.glb"
 
 @Composable
 private fun QuickActionButton(

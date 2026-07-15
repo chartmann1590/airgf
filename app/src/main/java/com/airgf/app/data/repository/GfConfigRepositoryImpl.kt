@@ -3,6 +3,7 @@ package com.airgf.app.data.repository
 import com.airgf.app.data.local.db.dao.GfConfigDao
 import com.airgf.app.data.local.db.entity.GfConfigEntity
 import com.airgf.app.domain.model.GfProfile
+import com.airgf.app.domain.model.CompanionPresentation
 import com.airgf.app.domain.model.PersonalityTrait
 import com.airgf.app.domain.model.RelationshipType
 import com.airgf.app.domain.model.VisualTemplate
@@ -45,9 +46,13 @@ class GfConfigRepositoryImpl @Inject constructor(
                 .mapNotNull { name -> runCatching { PersonalityTrait.valueOf(name) }.getOrNull() }
         }.getOrDefault(emptyList())
 
+        val companionPresentation = runCatching { CompanionPresentation.valueOf(presentation) }
+            .getOrDefault(CompanionPresentation.FEMININE)
         return GfProfile(
             name = name,
-            visualTemplate = VisualTemplate.fromPersistedName(visualTemplate),
+            visualTemplate = VisualTemplate.fromPersistedName(visualTemplate)
+                .takeIf { it.supports(companionPresentation) }
+                ?: VisualTemplate.entries.first { it.supports(companionPresentation) },
             personalityTraits = traits,
             relationshipType = runCatching { RelationshipType.valueOf(relationshipType) }
                 .getOrDefault(RelationshipType.ROMANTIC),
@@ -55,6 +60,7 @@ class GfConfigRepositoryImpl @Inject constructor(
                 .getOrDefault(VoiceOption.SOFT),
             spicyModeEnabled = spicyModeEnabled,
             customPromptAdditions = customPromptAdditions,
+            presentation = companionPresentation,
         )
     }
 
@@ -67,5 +73,6 @@ class GfConfigRepositoryImpl @Inject constructor(
         voiceOption = voiceOption.name,
         spicyModeEnabled = spicyModeEnabled,
         customPromptAdditions = customPromptAdditions,
+        presentation = presentation.name,
     )
 }

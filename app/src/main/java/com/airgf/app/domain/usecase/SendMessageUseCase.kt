@@ -6,6 +6,8 @@ import com.airgf.app.domain.model.Message
 import com.airgf.app.domain.repository.ChatRepository
 import com.airgf.app.domain.repository.GfConfigRepository
 import com.airgf.app.imagegen.ImageGenerator
+import com.airgf.app.domain.repository.MemoryRepository
+import com.airgf.app.safety.ContentSafetyPolicy
 import com.airgf.app.llm.LlmSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -25,6 +27,10 @@ class SendMessageUseCase @Inject constructor(
     private val detectImageRequestUseCase: DetectImageRequestUseCase,
     private val imageStorageUtil: ImageStorageUtil,
     private val imageGenerator: ImageGenerator,
+    private val memoryRepository: MemoryRepository,
+    private val extractMemoryCandidatesUseCase: ExtractMemoryCandidatesUseCase,
+    private val responseSimilarityUseCase: ResponseSimilarityUseCase,
+    private val contentSafetyPolicy: ContentSafetyPolicy,
 ) {
     operator fun invoke(
         session: LlmSession,
@@ -48,37 +54,75 @@ class SendMessageUseCase @Inject constructor(
             isSpicyMode = spicyMode,
             imagePath = imagePath,
         )
-        chatRepository.insertMessage(userMessage)
+        val userMessageId = chatRepository.insertMessage(userMessage)
+        extractMemoryCandidatesUseCase(trimmed, userMessageId).forEach { candidate ->
+            memoryRepository.suggest(candidate)
+        }
 
-        val explicitImagePrompt = gfProfile?.let { buildDirectImagePrompt(trimmed, it.name) }
+        val inputDecision = contentSafetyPolicy.classify(trimmed)
+        val modelInput = if (inputDecision.allowed) {
+            trimmed
+        } else {
+            "The user's request was blocked by the ${inputDecision.category.name} safety policy. " +
+                "Reply in character with a brief, naturally worded boundary and redirect to a safe topic. " +
+                "Do not repeat or describe the blocked request."
+        }
 
-        val responseBuilder = StringBuilder()
+        var rawResponse: String
         try {
-            if (imageBitmap != null) {
-                session.sendMessageWithImage(trimmed, imageBitmap).collect { chunk ->
-                    responseBuilder.append(chunk)
-                    emit(SendMessageEvent.Streaming(responseBuilder.toString()))
-                }
+            rawResponse = if (imageBitmap != null && inputDecision.allowed) {
+                session.sendMessageWithImage(modelInput, imageBitmap).collectText()
             } else {
-                session.sendMessage(trimmed).collect { chunk ->
-                    responseBuilder.append(chunk)
-                    emit(SendMessageEvent.Streaming(responseBuilder.toString()))
-                }
+                session.sendMessage(modelInput).collectText()
             }
         } catch (e: Exception) {
             emit(SendMessageEvent.Error(e.message ?: "Failed to generate response"))
             return@flow
         }
 
-        val rawResponse = responseBuilder.toString()
         if (rawResponse.isBlank()) {
             emit(SendMessageEvent.Error("Empty response from model"))
             return@flow
         }
 
+        val recentAssistant = chatRepository.getRecentMessages(12)
+            .filterNot { it.isUser }
+            .map { it.content }
+        if (responseSimilarityUseCase(rawResponse, recentAssistant) >= REPETITION_THRESHOLD) {
+            val retry = runCatching {
+                session.sendMessage(
+                    "Rewrite that response with a different opening, wording, and conversational move. Do not mention this instruction.",
+                ).collectText()
+            }.getOrNull()
+            if (!retry.isNullOrBlank()) rawResponse = retry
+        }
+
+        val outputDecision = contentSafetyPolicy.classify(rawResponse)
+        if (!outputDecision.allowed) {
+            val safeRetry = runCatching {
+                session.sendMessage(
+                    "Your last draft violated the ${outputDecision.category.name} safety policy. " +
+                        "Generate a new, brief in-character response that sets a boundary and redirects safely. " +
+                        "Do not include explicit details or mention these instructions.",
+                ).collectText()
+            }.getOrNull()
+            if (!safeRetry.isNullOrBlank() && contentSafetyPolicy.classify(safeRetry).allowed) {
+                rawResponse = safeRetry
+            } else {
+                rawResponse = "This request cannot be completed safely."
+            }
+        }
+        val modelMemoryExtraction = extractMemoryCandidatesUseCase.fromModelResponse(
+            rawResponse,
+            userMessageId,
+        )
+        modelMemoryExtraction.candidates.forEach { memoryRepository.suggest(it) }
+        rawResponse = modelMemoryExtraction.cleanResponse
+        emit(SendMessageEvent.Streaming(rawResponse))
+
         val (afterEmotion, emotion) = detectEmotionUseCase(rawResponse)
         val (cleanText, taggedImagePrompt) = detectImageRequestUseCase(afterEmotion)
-        val imagePrompt = taggedImagePrompt ?: explicitImagePrompt
+        val imagePrompt = taggedImagePrompt?.takeIf(contentSafetyPolicy::safeImagePrompt)
 
         if (imagePrompt != null) {
             emit(SendMessageEvent.GeneratingImage(imagePrompt, cleanText))
@@ -118,37 +162,11 @@ class SendMessageUseCase @Inject constructor(
         }
     }
 
-    private fun buildDirectImagePrompt(text: String, gfName: String): String? {
-        val normalized = text.lowercase()
-        val asksForImage = listOf(
-            "send me a picture",
-            "send me a pic",
-            "send pic",
-            "send a pic",
-            "send picture",
-            "send photo",
-            "send me a photo",
-            "send me selfie",
-            "send me a selfie",
-            "send selfie",
-            "show me a picture",
-            "show me a pic",
-            "show me a photo",
-            "show me yourself",
-            "picture of yourself",
-            "photo of yourself",
-            "pic of yourself",
-            "selfie",
-        ).any(normalized::contains)
-
-        if (!asksForImage) return null
-
-        val isSelfie = listOf("selfie", "yourself", "you").any(normalized::contains)
-        val subject = if (isSelfie) {
-            "$gfName, an adult woman, warm natural selfie"
-        } else {
-            "$gfName, an adult woman, personal photo"
-        }
-        return "$subject, expressive eyes, soft flattering light, tasteful outfit, realistic portrait, high detail"
+    companion object {
+        private const val REPETITION_THRESHOLD = 0.62f
     }
+}
+
+private suspend fun Flow<String>.collectText(): String = buildString {
+    collect { append(it) }
 }

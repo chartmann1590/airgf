@@ -17,10 +17,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 @Singleton
 class LlmEngine @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val imageDescriptionService: ImageDescriptionService,
 ) {
     private var engine: Engine? = null
 
@@ -77,16 +80,13 @@ class LlmEngine @Inject constructor(
         }
     }
 
-    private var activeSession: LlmSession? = null
+    private val activeSessions = ConcurrentHashMap<String, LlmSession>()
 
     fun createSession(systemPrompt: String, history: List<DomainMessage>): LlmSession {
         val activeEngine = engine ?: throw IllegalStateException("Engine not initialized")
         if (_state.value !is LlmState.Ready) {
             throw IllegalStateException("Engine is not ready")
         }
-
-        activeSession?.close()
-        activeSession = null
 
         val initialMessages = history.map { message ->
             val content = when {
@@ -118,8 +118,9 @@ class LlmEngine @Inject constructor(
                 ),
             ),
         )
-        val session = LlmSession(conversation)
-        activeSession = session
+        val sessionId = UUID.randomUUID().toString()
+        val session = LlmSession(conversation, imageDescriptionService) { activeSessions.remove(sessionId) }
+        activeSessions[sessionId] = session
         return session
     }
 
@@ -129,8 +130,8 @@ class LlmEngine @Inject constructor(
     }
 
     private fun releaseInternal() {
-        activeSession?.close()
-        activeSession = null
+        activeSessions.values.toList().forEach { it.close() }
+        activeSessions.clear()
         engine?.close()
         engine = null
     }

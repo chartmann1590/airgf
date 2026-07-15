@@ -56,7 +56,7 @@ class ExportChatUseCase @Inject constructor(
                     messages = messagesByConversation[conversation.id].orEmpty().map { message ->
                         ExportMessage(
                             id = message.id,
-                            role = if (message.isUser) "user" else "girlfriend",
+                            role = if (message.isUser) "user" else "assistant",
                             content = message.content,
                             timestamp = message.timestamp,
                             emotion = message.emotion?.name,

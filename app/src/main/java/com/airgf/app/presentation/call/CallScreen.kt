@@ -200,13 +200,14 @@ private fun CallAvatarStage(
                 emotion = uiState.emotion,
                 mouthShape = uiState.mouthShape,
                 assetRepository = avatarAssetRepository,
+                action = uiState.avatarAction,
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(28.dp)),
             )
         } else {
             Text(
-                text = uiState.gfProfile?.name ?: "AirGF",
+                text = uiState.gfProfile?.name ?: "Amoura",
                 style = MaterialTheme.typography.headlineMedium,
                 color = Primary,
             )

@@ -52,7 +52,7 @@ fun WelcomeScreen(
             Box(contentAlignment = Alignment.Center) {
                 androidx.compose.foundation.Image(
                     painter = painterResource(R.drawable.ic_launcher_foreground),
-                    contentDescription = "AirGF",
+                    contentDescription = "Amoura",
                     modifier = Modifier
                         .size(160.dp)
                         .shadow(24.dp, RoundedCornerShape(32.dp), ambientColor = PurpleShadow, spotColor = PurpleShadow)
@@ -61,7 +61,7 @@ fun WelcomeScreen(
             }
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "AirGF",
+                text = "Amoura",
                 style = MaterialTheme.typography.displaySmall,
                 color = Primary,
                 fontWeight = FontWeight.Bold,

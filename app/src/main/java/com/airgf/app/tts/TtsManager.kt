@@ -4,6 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
+import android.util.Log
+import com.airgf.app.domain.model.CompanionPresentation
+import com.airgf.app.domain.model.VisualTemplate
 import com.airgf.app.domain.model.VoiceOption
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +24,9 @@ class TtsManager @Inject constructor(
     private var tts: TextToSpeech? = null
     private var initStarted = false
     private var pendingVoiceOption: VoiceOption? = null
+    private var currentVoiceOption: VoiceOption = VoiceOption.SOFT
+    private var presentation: CompanionPresentation = CompanionPresentation.FEMININE
+    private var preferredLocaleTags: List<String> = listOf(Locale.US.toLanguageTag())
     private var speechSpeed = 1.0f
 
     private val _isReady = MutableStateFlow(false)
@@ -48,11 +54,22 @@ class TtsManager @Inject constructor(
     }
 
     fun setVoice(voiceOption: VoiceOption) {
+        currentVoiceOption = voiceOption
         if (!_isReady.value) {
             pendingVoiceOption = voiceOption
             return
         }
         applyVoice(voiceOption)
+    }
+
+    fun setPresentation(value: CompanionPresentation) {
+        presentation = value
+        if (_isReady.value) applyVoice(currentVoiceOption)
+    }
+
+    fun setAvatar(template: VisualTemplate) {
+        preferredLocaleTags = template.preferredVoiceLocaleTags
+        if (_isReady.value) applyVoice(currentVoiceOption)
     }
 
     fun setSpeechSpeed(speed: Float) {
@@ -115,20 +132,33 @@ class TtsManager @Inject constructor(
     private fun applyVoice(voiceOption: VoiceOption) {
         val engine = tts ?: return
         val voices = engine.voices
-            ?.filter { voice ->
-                voice.locale.language == "en" && !voice.isNetworkConnectionRequired
-            }
+            ?.filter { voice -> !voice.isNetworkConnectionRequired }
             .orEmpty()
 
-        val selected = selectVoice(voices, voiceOption) ?: voices.firstOrNull()
-        selected?.let { engine.voice = it }
-
-        when (voiceOption) {
-            VoiceOption.SOFT -> engine.setPitch(1.05f)
-            VoiceOption.ENERGETIC -> engine.setPitch(1.15f)
-            VoiceOption.MATURE -> engine.setPitch(0.95f)
-            VoiceOption.BREATHY -> engine.setPitch(0.85f)
+        val selected = selectVoice(voices, voiceOption)
+            ?: voices.firstOrNull { it.locale.language == Locale.US.language }
+            ?: voices.firstOrNull()
+        selected?.let {
+            engine.language = it.locale
+            engine.voice = it
+            Log.i(
+                TAG,
+                "Selected offline voice=${it.name} locale=${it.locale.toLanguageTag()} quality=${it.quality}",
+            )
         }
+
+        val presentationPitch = when (presentation) {
+            CompanionPresentation.FEMININE -> 1.03f
+            CompanionPresentation.MASCULINE -> 0.96f
+            CompanionPresentation.NEUTRAL -> 1.0f
+        }
+        val stylePitch = when (voiceOption) {
+            VoiceOption.SOFT -> 1.01f
+            VoiceOption.ENERGETIC -> 1.04f
+            VoiceOption.MATURE -> 0.98f
+            VoiceOption.BREATHY -> 0.99f
+        }
+        engine.setPitch((presentationPitch * stylePitch).coerceIn(0.9f, 1.1f))
         engine.setSpeechRate(speechSpeed)
     }
 
@@ -139,24 +169,45 @@ class TtsManager @Inject constructor(
     }
 
     private fun scoreVoice(voice: Voice, option: VoiceOption): Int {
-        val name = voice.name.lowercase()
-        var score = voice.quality
+        val name = buildString {
+            append(voice.name.lowercase())
+            append(' ')
+            append(voice.features.joinToString(" ").lowercase())
+        }
+        var score = voice.quality * 2
+
+        val localeIndex = preferredLocaleTags.indexOfFirst { preferred ->
+            voice.locale.toLanguageTag().equals(preferred, ignoreCase = true)
+        }
+        score += when (localeIndex) {
+            0 -> 1_000
+            1 -> 700
+            else -> if (voice.locale.language == "en") 250 else -500
+        }
+        score += (500 - voice.latency).coerceAtLeast(0)
+
+        val soundsFeminine = name.contains("female") || name.contains("-f") || name.endsWith("f")
+        val soundsMasculine = name.contains("male") || name.contains("-m") || name.endsWith("m")
+        score += when (presentation) {
+            CompanionPresentation.FEMININE -> if (soundsFeminine) 40 else if (soundsMasculine) -40 else 0
+            CompanionPresentation.MASCULINE -> if (soundsMasculine) 40 else if (soundsFeminine) -40 else 0
+            CompanionPresentation.NEUTRAL -> 0
+        }
 
         when (option) {
             VoiceOption.SOFT -> {
-                if (name.contains("female") || name.contains("-f") || name.endsWith("f")) score += 20
+                if (soundsFeminine) score += 20
                 if (name.contains("soft") || name.contains("gentle")) score += 15
             }
             VoiceOption.ENERGETIC -> {
                 if (name.contains("bright") || name.contains("b")) score += 15
-                score += voice.latency
             }
             VoiceOption.MATURE -> {
                 if (name.contains("warm") || name.contains("d") || name.contains("m")) score += 15
-                if (name.contains("male") || name.contains("-m") || name.endsWith("m")) score += 10
+                if (soundsMasculine) score += 10
             }
             VoiceOption.BREATHY -> {
-                score += (500 - voice.latency).coerceAtLeast(0)
+                if (name.contains("soft") || name.contains("calm")) score += 15
             }
         }
 
@@ -164,6 +215,7 @@ class TtsManager @Inject constructor(
     }
 
     companion object {
+        private const val TAG = "AirGfTts"
         private const val PREVIEW_TEXT = "Hi, I'm so happy to meet you!"
         const val MIN_SPEECH_RATE = 0.7f
         const val MAX_SPEECH_RATE = 1.3f

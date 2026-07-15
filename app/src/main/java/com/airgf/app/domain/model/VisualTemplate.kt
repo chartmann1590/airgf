@@ -41,9 +41,82 @@ enum class VisualTemplate(
     val remoteModelUrl: String? = null,
     val legacyNames: Set<String> = emptySet(),
     val supportsSceneView: Boolean = true,
+    val releaseEligible: Boolean = false,
+    val supportedPresentations: Set<CompanionPresentation> = emptySet(),
+    val preferredVoiceLocaleTags: List<String> = listOf("en-US"),
+    val stageVerticalOffset: Float = 0f,
+    val proceduralRigAnimation: Boolean = true,
     val fallbackPalette: AvatarFallbackPalette,
     val featureSet: AvatarFeatureSet = avatarDefaultFeatures,
 ) {
+    MAYA(
+        displayName = "Maya",
+        modelAssetPath = "models/maya.glb",
+        thumbnailAssetPath = "models/thumb_maya.webp",
+        deliveryMode = AvatarDeliveryMode.BUNDLED,
+        expectedSizeBytes = 8_571_204,
+        releaseEligible = true,
+        supportedPresentations = setOf(CompanionPresentation.FEMININE),
+        fallbackPalette = AvatarFallbackPalette(0xFFE5B08E, 0xFF3B2418, 0xFFFF6F61, 0xFF263238, 0xFF101416),
+        featureSet = AvatarFeatureSet(supportsBlink = false, supportsHeadTilt = false),
+    ),
+    NIA(
+        displayName = "Nia",
+        modelAssetPath = "models/nia.glb",
+        thumbnailAssetPath = "models/thumb_nia.webp",
+        deliveryMode = AvatarDeliveryMode.BUNDLED,
+        expectedSizeBytes = 8_751_964,
+        releaseEligible = true,
+        supportedPresentations = setOf(CompanionPresentation.FEMININE),
+        fallbackPalette = AvatarFallbackPalette(0xFF8D5D45, 0xFF17120F, 0xFF20B2AA, 0xFF28343A, 0xFF111719),
+        featureSet = AvatarFeatureSet(supportsBlink = false, supportsHeadTilt = false),
+    ),
+    SORA(
+        displayName = "Sora - Japanese",
+        modelAssetPath = "models/sora.glb",
+        thumbnailAssetPath = "models/thumb_sora.webp",
+        deliveryMode = AvatarDeliveryMode.BUNDLED,
+        expectedSizeBytes = 93_615_572,
+        releaseEligible = true,
+        supportedPresentations = setOf(CompanionPresentation.FEMININE),
+        preferredVoiceLocaleTags = listOf("ja-JP", "en-US"),
+        proceduralRigAnimation = true,
+        fallbackPalette = AvatarFallbackPalette(0xFFD7A078, 0xFF221A19, 0xFFFFC857, 0xFF30353B, 0xFF141719),
+        featureSet = AvatarFeatureSet(supportsBlink = false, supportsHeadTilt = false),
+    ),
+    LEO(
+        displayName = "Leo",
+        modelAssetPath = "models/leo.glb",
+        thumbnailAssetPath = "models/thumb_leo.webp",
+        deliveryMode = AvatarDeliveryMode.BUNDLED,
+        expectedSizeBytes = 11_210_124,
+        releaseEligible = true,
+        supportedPresentations = setOf(CompanionPresentation.MASCULINE),
+        fallbackPalette = AvatarFallbackPalette(0xFFD39B76, 0xFF171412, 0xFF4DA3FF, 0xFF27323C, 0xFF10161B),
+        featureSet = AvatarFeatureSet(supportsBlink = false, supportsHeadTilt = false),
+    ),
+    MARCUS(
+        displayName = "Marcus",
+        modelAssetPath = "models/marcus.glb",
+        thumbnailAssetPath = "models/thumb_marcus.webp",
+        deliveryMode = AvatarDeliveryMode.BUNDLED,
+        expectedSizeBytes = 10_008_632,
+        releaseEligible = true,
+        supportedPresentations = setOf(CompanionPresentation.MASCULINE),
+        fallbackPalette = AvatarFallbackPalette(0xFF86563F, 0xFF14110F, 0xFFFFC857, 0xFF30343A, 0xFF141619),
+        featureSet = AvatarFeatureSet(supportsBlink = false, supportsHeadTilt = false),
+    ),
+    KAI(
+        displayName = "Kai",
+        modelAssetPath = "models/kai.glb",
+        thumbnailAssetPath = "models/thumb_kai.webp",
+        deliveryMode = AvatarDeliveryMode.BUNDLED,
+        expectedSizeBytes = 7_255_732,
+        releaseEligible = true,
+        supportedPresentations = setOf(CompanionPresentation.MASCULINE),
+        fallbackPalette = AvatarFallbackPalette(0xFFD8A47D, 0xFF201B18, 0xFF20B2AA, 0xFF29373A, 0xFF101719),
+        featureSet = AvatarFeatureSet(supportsBlink = false, supportsHeadTilt = false),
+    ),
     ARIADNA(
         displayName = "Ariadna",
         modelAssetPath = "models/ariadna.glb",
@@ -81,6 +154,7 @@ enum class VisualTemplate(
         deliveryMode = AvatarDeliveryMode.BUNDLED,
         expectedSizeBytes = 10_783_560,
         legacyNames = setOf("ANIME_COOL", "STYLIZED_PUNK"),
+        releaseEligible = false,
         fallbackPalette = AvatarFallbackPalette(
             skinColor = 0xFFFFD4BC,
             hairColor = 0xFF0D0D10,
@@ -171,6 +245,7 @@ enum class VisualTemplate(
         deliveryMode = AvatarDeliveryMode.BUNDLED,
         expectedSizeBytes = 87_894_744,
         legacyNames = emptySet(),
+        releaseEligible = false,
         fallbackPalette = AvatarFallbackPalette(
             skinColor = 0xFFFFC7A7,
             hairColor = 0xFFFFD36A,
@@ -201,6 +276,7 @@ enum class VisualTemplate(
         deliveryMode = AvatarDeliveryMode.BUNDLED,
         expectedSizeBytes = 21_196_744,
         legacyNames = emptySet(),
+        releaseEligible = false,
         fallbackPalette = AvatarFallbackPalette(
             skinColor = 0xFFD79A72,
             hairColor = 0xFF25120E,
@@ -260,8 +336,11 @@ enum class VisualTemplate(
     val isOnDemand: Boolean
         get() = deliveryMode == AvatarDeliveryMode.ON_DEMAND
 
+    fun supports(presentation: CompanionPresentation): Boolean = releaseEligible &&
+        (presentation == CompanionPresentation.NEUTRAL || presentation in supportedPresentations)
+
     companion object {
-        private val defaultTemplate = ARIADNA
+        private val defaultTemplate = MAYA
 
         fun fromPersistedName(name: String?): VisualTemplate {
             if (name.isNullOrBlank()) return defaultTemplate

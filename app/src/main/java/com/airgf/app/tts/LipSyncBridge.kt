@@ -2,6 +2,7 @@ package com.airgf.app.tts
 
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.delay
 
 @Singleton
 class LipSyncBridge @Inject constructor() {
@@ -38,5 +39,21 @@ class LipSyncBridge @Inject constructor() {
     fun getVisemeForWord(word: String): MouthShape {
         val c = word.lowercase().firstOrNull() ?: return MouthShape.CLOSED
         return phonemeMap[c] ?: MouthShape.OPEN_A
+    }
+
+    fun getVisemeSequence(word: String): List<MouthShape> = word.lowercase()
+        .filter(Char::isLetter)
+        .map { phonemeMap[it] ?: MouthShape.OPEN_A }
+        .fold(mutableListOf<MouthShape>()) { result, shape ->
+            if (result.lastOrNull() != shape) result.add(shape)
+            result
+        }
+        .ifEmpty { listOf(MouthShape.CLOSED) }
+
+    suspend fun animateWord(word: String, onShape: (MouthShape) -> Unit) {
+        getVisemeSequence(word).take(5).forEach { shape ->
+            onShape(shape)
+            delay(65)
+        }
     }
 }

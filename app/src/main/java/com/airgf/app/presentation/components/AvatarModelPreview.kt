@@ -18,8 +18,12 @@ import com.airgf.app.data.model.AvatarModelSource
 import com.airgf.app.domain.model.VisualTemplate
 import dagger.hilt.android.EntryPointAccessors
 import io.github.sceneview.SceneView
+import io.github.sceneview.SurfaceType
+import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
+import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberEngine
+import io.github.sceneview.rememberMainLightNode
 import io.github.sceneview.rememberModelInstance
 import io.github.sceneview.rememberModelLoader
 
@@ -33,6 +37,13 @@ fun AvatarModelPreview(
     val context = LocalContext.current
     val engine = rememberEngine()
     val modelLoader = rememberModelLoader(engine)
+    val cameraNode = rememberCameraNode(engine) {
+        position = Position(0f, 0f, 4.2f)
+        lookAt(Position(0f, 0f, 0f))
+    }
+    val mainLightNode = rememberMainLightNode(engine) {
+        intensity = 100_000f
+    }
     val assetRepository = remember(context) {
         EntryPointAccessors.fromApplication(
             context.applicationContext,
@@ -66,12 +77,17 @@ fun AvatarModelPreview(
         if (modelInstance != null) {
             SceneView(
                 modifier = Modifier.fillMaxSize(),
+                surfaceType = SurfaceType.TextureSurface,
+                isOpaque = false,
                 engine = engine,
                 modelLoader = modelLoader,
+                cameraNode = cameraNode,
+                mainLightNode = mainLightNode,
             ) {
                 ModelNode(
                     modelInstance = modelInstance,
                     scaleToUnits = scaleToUnits,
+                    centerOrigin = Position(0f, 0f, 0f),
                     autoAnimate = false,
                 )
             }

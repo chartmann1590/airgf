@@ -2,6 +2,7 @@ package com.airgf.app.presentation.character
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.airgf.app.ads.ConsentManager
 import com.airgf.app.animation.CharacterAnimationController
 import com.airgf.app.data.repository.AvatarAssetRepository
 import com.airgf.app.domain.model.EmotionState
@@ -9,11 +10,13 @@ import com.airgf.app.domain.model.GfProfile
 import com.airgf.app.domain.model.VoiceOption
 import com.airgf.app.domain.repository.ChatRepository
 import com.airgf.app.domain.repository.GfConfigRepository
+import com.airgf.app.domain.repository.SubscriptionRepository
 import com.airgf.app.domain.repository.UserRepository
 import com.airgf.app.domain.usecase.BuildSystemPromptUseCase
 import com.airgf.app.domain.usecase.DetectEmotionUseCase
 import com.airgf.app.llm.LlmEngine
 import com.airgf.app.presentation.components.WaveformStyle
+import com.airgf.app.safety.ContentSafetyPolicy
 import com.airgf.app.tts.LipSyncBridge
 import com.airgf.app.tts.TtsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,6 +36,8 @@ data class CharacterUiState(
     val isSpeaking: Boolean = false,
     val speechBubbleText: String? = null,
     val waveformStyle: WaveformStyle = WaveformStyle.SOFT,
+    val action: CharacterAnimationController.AvatarAction = CharacterAnimationController.AvatarAction.IDLE,
+    val isSubscribed: Boolean = false,
 )
 
 @HiltViewModel
@@ -46,14 +51,21 @@ class CharacterViewModel @Inject constructor(
     private val llmEngine: LlmEngine,
     private val buildSystemPromptUseCase: BuildSystemPromptUseCase,
     private val detectEmotionUseCase: DetectEmotionUseCase,
+    private val contentSafetyPolicy: ContentSafetyPolicy,
     val avatarAssetRepository: AvatarAssetRepository,
+    private val subscriptionRepository: SubscriptionRepository,
+    private val consentManager: ConsentManager,
 ) : ViewModel() {
+
+    val canRequestAds: Boolean get() = consentManager.canRequestAds
 
     private val _state = MutableStateFlow(CharacterUiState())
     val state: StateFlow<CharacterUiState> = _state.asStateFlow()
 
     private var talkJob: Job? = null
     private var bubbleDismissJob: Job? = null
+    private var ambientActionJob: Job? = null
+    private var visemeJob: Job? = null
 
     private val greetingPrompts = listOf(
         "Say a short sweet greeting to your partner.",
@@ -72,6 +84,11 @@ class CharacterViewModel @Inject constructor(
                         waveformStyle = profile?.voiceOption.toWaveformStyle(),
                     )
                 }
+                profile?.let {
+                    ttsManager.setPresentation(it.presentation)
+                    ttsManager.setAvatar(it.visualTemplate)
+                    ttsManager.setVoice(it.voiceOption)
+                }
             }
         }
 
@@ -86,6 +103,12 @@ class CharacterViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            subscriptionRepository.isSubscribedFlow().collect { subscribed ->
+                _state.update { it.copy(isSubscribed = subscribed) }
+            }
+        }
+
+        viewModelScope.launch {
             animationController.currentEmotion.collect { emotion ->
                 _state.update { it.copy(emotion = emotion) }
             }
@@ -94,6 +117,11 @@ class CharacterViewModel @Inject constructor(
         viewModelScope.launch {
             animationController.currentMouthShape.collect { shape ->
                 _state.update { it.copy(mouthShape = shape) }
+            }
+        }
+        viewModelScope.launch {
+            animationController.currentAction.collect { action ->
+                _state.update { it.copy(action = action) }
             }
         }
 
@@ -107,6 +135,18 @@ class CharacterViewModel @Inject constructor(
         }
 
         ttsManager.ensureInitialized()
+        ambientActionJob = viewModelScope.launch {
+            while (true) {
+                delay(9000)
+                if (!_state.value.isSpeaking) {
+                    animationController.requestAction(CharacterAnimationController.AvatarAction.WALKING)
+                    delay(6200)
+                    animationController.requestAction(CharacterAnimationController.AvatarAction.WAVING)
+                    delay(2200)
+                    animationController.requestAction(CharacterAnimationController.AvatarAction.IDLE)
+                }
+            }
+        }
     }
 
     fun tapToTalk() {
@@ -115,7 +155,7 @@ class CharacterViewModel @Inject constructor(
             return
         }
         if (llmEngine.state.value !is LlmEngine.LlmState.Ready) {
-            speakText("Hey! I'm still loading, give me a moment...")
+            _state.update { it.copy(speechBubbleText = "AI model is still loading.") }
             return
         }
 
@@ -127,9 +167,7 @@ class CharacterViewModel @Inject constructor(
                 val session = llmEngine.createSession(systemPrompt, emptyList())
                 val fullResponse = StringBuilder()
                 try {
-                    session.sendMessage(prompt).collect { token ->
-                        fullResponse.append(token)
-                    }
+                    fullResponse.append(generateSafeResponse(session, prompt))
                 } finally {
                     session.close()
                 }
@@ -138,7 +176,7 @@ class CharacterViewModel @Inject constructor(
                 animationController.setEmotion(emotion)
                 speakText(cleanText)
             } catch (_: Exception) {
-                speakText("I'm having trouble thinking right now... try again?")
+                _state.update { it.copy(speechBubbleText = "AI response unavailable.") }
             }
         }
     }
@@ -149,8 +187,7 @@ class CharacterViewModel @Inject constructor(
         talkJob?.cancel()
         talkJob = viewModelScope.launch {
             if (llmEngine.state.value !is LlmEngine.LlmState.Ready) {
-                animationController.setEmotion(EmotionState.HAPPY)
-                speakText("Aww, I love you too!")
+                _state.update { it.copy(speechBubbleText = "AI model is still loading.") }
                 return@launch
             }
             try {
@@ -158,9 +195,12 @@ class CharacterViewModel @Inject constructor(
                 val session = llmEngine.createSession(systemPrompt, emptyList())
                 val fullResponse = StringBuilder()
                 try {
-                    session.sendMessage("Your partner just said: \"$message\". Respond warmly and briefly.").collect { token ->
-                        fullResponse.append(token)
-                    }
+                    fullResponse.append(
+                        generateSafeResponse(
+                            session,
+                            "Your partner just said: \"$message\". Respond warmly and briefly.",
+                        ),
+                    )
                 } finally {
                     session.close()
                 }
@@ -169,8 +209,7 @@ class CharacterViewModel @Inject constructor(
                 animationController.setEmotion(emotion)
                 speakText(cleanText)
             } catch (_: Exception) {
-                animationController.setEmotion(EmotionState.HAPPY)
-                speakText("That means so much to me!")
+                _state.update { it.copy(speechBubbleText = "AI response unavailable.") }
             }
         }
     }
@@ -181,12 +220,11 @@ class CharacterViewModel @Inject constructor(
         _state.update { it.copy(speechBubbleText = null) }
     }
 
-    fun toggleSpicyMode() {
-        val gf = _state.value.gfProfile ?: return
+    fun dance() {
         viewModelScope.launch {
-            val updated = gf.copy(spicyModeEnabled = !gf.spicyModeEnabled)
-            gfConfigRepository.saveProfile(updated)
-            _state.update { it.copy(gfProfile = updated) }
+            animationController.requestAction(CharacterAnimationController.AvatarAction.DANCING)
+            delay(7000)
+            if (!_state.value.isSpeaking) animationController.requestAction(CharacterAnimationController.AvatarAction.IDLE)
         }
     }
 
@@ -196,12 +234,33 @@ class CharacterViewModel @Inject constructor(
         ttsManager.speak(
             text = text,
             onWordStart = { word ->
-                animationController.setMouthShape(lipSyncBridge.getVisemeForWord(word))
+                visemeJob?.cancel()
+                visemeJob = viewModelScope.launch {
+                    lipSyncBridge.animateWord(word, animationController::setMouthShape)
+                }
             },
             onDone = {
                 animationController.setMouthShape(LipSyncBridge.MouthShape.CLOSED)
             },
         )
+    }
+
+    private suspend fun generateSafeResponse(
+        session: com.airgf.app.llm.LlmSession,
+        prompt: String,
+    ): String {
+        val draft = buildString { session.sendMessage(prompt).collect { append(it) } }
+        val decision = contentSafetyPolicy.classify(draft)
+        if (decision.allowed) return draft
+
+        val retry = buildString {
+            session.sendMessage(
+                "Regenerate that response without ${decision.category.name} content. " +
+                    "Stay warm, brief, and do not mention this instruction.",
+            ).collect { append(it) }
+        }
+        check(contentSafetyPolicy.classify(retry).allowed) { "Model produced unsafe output" }
+        return retry
     }
 
     private fun scheduleBubbleDismiss() {
@@ -215,6 +274,8 @@ class CharacterViewModel @Inject constructor(
     override fun onCleared() {
         talkJob?.cancel()
         bubbleDismissJob?.cancel()
+        ambientActionJob?.cancel()
+        visemeJob?.cancel()
         ttsManager.stop()
         super.onCleared()
     }

@@ -1,5 +1,8 @@
 ﻿package com.airgf.app.presentation.settings
 
+import android.app.Activity
+import com.airgf.app.ads.ConsentManager
+import com.airgf.app.ads.RewardedAdManager
 import com.airgf.app.data.model.DownloadState
 import com.airgf.app.domain.model.GfProfile
 import com.airgf.app.domain.model.PersonalityTrait
@@ -12,7 +15,14 @@ import com.airgf.app.domain.repository.GfConfigRepository
 import com.airgf.app.domain.repository.ImageGenRepository
 import com.airgf.app.domain.repository.ModelRepository
 import com.airgf.app.domain.repository.UserRepository
+import com.airgf.app.domain.repository.MemoryRepository
+import com.airgf.app.domain.model.MemoryState
+import com.airgf.app.domain.model.CompanionPresentation
+import com.airgf.app.llm.ModelVariant
+import com.airgf.app.domain.repository.SubscriptionRepository
 import com.airgf.app.domain.usecase.ExportChatUseCase
+import com.airgf.app.domain.usecase.GetEffectiveSpicyModeUseCase
+import com.airgf.app.domain.usecase.GrantSpicyModeCreditUseCase
 import com.airgf.app.domain.usecase.ResetEverythingUseCase
 import com.airgf.app.notification.ProactiveMessageScheduler
 import com.airgf.app.tts.TtsManager
@@ -39,7 +49,17 @@ class SettingsViewModel @Inject constructor(
     private val resetEverythingUseCase: ResetEverythingUseCase,
     private val proactiveScheduler: ProactiveMessageScheduler,
     private val ttsManager: TtsManager,
+    private val memoryRepository: MemoryRepository,
+    private val subscriptionRepository: SubscriptionRepository,
+    private val getEffectiveSpicyModeUseCase: GetEffectiveSpicyModeUseCase,
+    private val grantSpicyModeCreditUseCase: GrantSpicyModeCreditUseCase,
+    val rewardedAdManager: RewardedAdManager,
+    val consentManager: ConsentManager,
 ) : ViewModel() {
+
+    fun launchSubscriptionPurchase(activity: Activity) {
+        subscriptionRepository.launchPurchaseFlow(activity)
+    }
 
     private val _state = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
@@ -52,6 +72,11 @@ class SettingsViewModel @Inject constructor(
         observeSettings()
         refreshModelStatus()
         refreshImageModelStatus()
+        viewModelScope.launch {
+            memoryRepository.observeMemories().collect { memories ->
+                _state.update { it.copy(memories = memories) }
+            }
+        }
     }
 
     fun updateGfName(name: String) {
@@ -60,6 +85,7 @@ class SettingsViewModel @Inject constructor(
 
     fun updateVisualTemplate(template: VisualTemplate) {
         updateGfProfile { it.copy(visualTemplate = template) }
+        ttsManager.setAvatar(template)
     }
 
     fun togglePersonalityTrait(trait: PersonalityTrait) {
@@ -79,7 +105,46 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setSpicyMode(enabled: Boolean) {
+        if (enabled && (_state.value.userProfile?.age ?: 0) < MINIMUM_AGE) {
+            viewModelScope.launch { _events.emit(SettingsEvent.ShowMessage("Romance mode is available only to adults 18 and older.")) }
+            return
+        }
+        if (enabled && !_state.value.isSubscribed) {
+            _state.update { it.copy(showPaywall = true) }
+            return
+        }
         updateGfProfile { it.copy(spicyModeEnabled = enabled) }
+    }
+
+    fun dismissPaywall() {
+        _state.update { it.copy(showPaywall = false) }
+    }
+
+    fun requestSubscribe() {
+        viewModelScope.launch { _events.emit(SettingsEvent.LaunchSubscriptionPurchase) }
+    }
+
+    fun requestWatchRewardedAd() {
+        viewModelScope.launch { _events.emit(SettingsEvent.LaunchRewardedAd) }
+    }
+
+    fun openPrivacyOptions() {
+        viewModelScope.launch { _events.emit(SettingsEvent.OpenPrivacyOptions) }
+    }
+
+    /** Called once the rewarded ad's earned-reward callback has fired. */
+    fun onRewardedAdEarned() {
+        viewModelScope.launch {
+            when (grantSpicyModeCreditUseCase()) {
+                GrantSpicyModeCreditUseCase.Result.Granted -> {
+                    _state.update { it.copy(showPaywall = false) }
+                    _events.emit(SettingsEvent.ShowMessage("+${GrantSpicyModeCreditUseCase.CREDIT_MINUTES_PER_AD} min of Spicy Mode unlocked."))
+                }
+                GrantSpicyModeCreditUseCase.Result.DailyCapReached -> {
+                    _events.emit(SettingsEvent.ShowMessage("You've reached today's Spicy Mode credit limit. It resets at midnight."))
+                }
+            }
+        }
     }
 
     fun setVoiceOption(option: VoiceOption) {
@@ -87,7 +152,35 @@ class SettingsViewModel @Inject constructor(
         ttsManager.setVoice(option)
     }
 
+    fun setCompanionPresentation(presentation: CompanionPresentation) {
+        ttsManager.setPresentation(presentation)
+        _state.value.gfProfile?.let { profile ->
+            ttsManager.setAvatar(
+                profile.visualTemplate.takeIf { it.supports(presentation) }
+                    ?: VisualTemplate.entries.first { it.supports(presentation) },
+            )
+        }
+        updateGfProfile { profile ->
+            profile.copy(
+                presentation = presentation,
+                visualTemplate = profile.visualTemplate.takeIf { it.supports(presentation) }
+                    ?: VisualTemplate.entries.first { it.supports(presentation) },
+            )
+        }
+    }
+
+    fun setModelVariant(variant: ModelVariant) {
+        viewModelScope.launch {
+            modelRepository.setSelectedVariant(variant)
+            _events.emit(SettingsEvent.ShowMessage("${variant.displayName} selected. Use Re-download Model to install it."))
+        }
+    }
+
     fun previewVoice(option: VoiceOption) {
+        _state.value.gfProfile?.let {
+            ttsManager.setPresentation(it.presentation)
+            ttsManager.setAvatar(it.visualTemplate)
+        }
         ttsManager.setSpeechSpeed(_state.value.speechSpeed)
         ttsManager.previewVoice(option)
     }
@@ -98,6 +191,10 @@ class SettingsViewModel @Inject constructor(
 
     fun updateUserAge(age: String) {
         val parsedAge = age.filter(Char::isDigit).take(3).toIntOrNull() ?: return
+        if (parsedAge < MINIMUM_AGE) {
+            viewModelScope.launch { _events.emit(SettingsEvent.ShowMessage("AirGF is for adults 18 and older.")) }
+            return
+        }
         updateUserProfile { it.copy(age = parsedAge) }
     }
 
@@ -169,6 +266,21 @@ class SettingsViewModel @Inject constructor(
 
     fun stopPreview() {
         ttsManager.stop()
+    }
+
+    fun approveMemory(id: Long) {
+        viewModelScope.launch { memoryRepository.setState(id, MemoryState.APPROVED) }
+    }
+
+    fun forgetMemory(id: Long) {
+        viewModelScope.launch { memoryRepository.setState(id, MemoryState.DELETED) }
+    }
+
+    fun forgetAllMemories() {
+        viewModelScope.launch {
+            memoryRepository.deleteAll()
+            _events.emit(SettingsEvent.ShowMessage("Companion memory cleared."))
+        }
     }
 
     fun exportChatHistory() {
@@ -316,6 +428,7 @@ class SettingsViewModel @Inject constructor(
                 userRepository.speechSpeedFlow(),
                 userRepository.proactiveMessagesEnabledFlow(),
                 userRepository.notificationFrequencyFlow(),
+                modelRepository.selectedVariantFlow(),
             ) { values ->
                 SettingsSnapshot(
                     gfProfile = values[0] as GfProfile?,
@@ -324,6 +437,7 @@ class SettingsViewModel @Inject constructor(
                     speechSpeed = values[3] as Float,
                     proactiveMessagesEnabled = values[4] as Boolean,
                     notificationFrequency = values[5] as String,
+                    selectedModelVariant = values[6] as ModelVariant,
                 )
             }.collect { snapshot ->
                 _state.update { current ->
@@ -335,10 +449,44 @@ class SettingsViewModel @Inject constructor(
                         speechSpeed = snapshot.speechSpeed,
                         proactiveMessagesEnabled = snapshot.proactiveMessagesEnabled,
                         notificationFrequency = snapshot.notificationFrequency,
+                        selectedModelVariant = snapshot.selectedModelVariant,
                     )
                 }
                 ttsManager.setSpeechSpeed(snapshot.speechSpeed)
-                snapshot.gfProfile?.voiceOption?.let(ttsManager::setVoice)
+                snapshot.gfProfile?.let { profile ->
+                    ttsManager.setPresentation(profile.presentation)
+                    ttsManager.setAvatar(profile.visualTemplate)
+                    ttsManager.setVoice(profile.voiceOption)
+                }
+            }
+        }
+        viewModelScope.launch {
+            combine(
+                subscriptionRepository.isSubscribedFlow(),
+                getEffectiveSpicyModeUseCase.flow(),
+                subscriptionRepository.spicyModeGrantedUntilFlow(),
+                subscriptionRepository.spicyCreditMinutesRemainingTodayFlow(),
+                subscriptionRepository.subscriptionProductDetailsFlow(),
+            ) { values ->
+                MonetizationSnapshot(
+                    isSubscribed = values[0] as Boolean,
+                    spicyModeActive = values[1] as Boolean,
+                    spicyModeGrantedUntil = values[2] as Long?,
+                    spicyCreditMinutesRemainingToday = values[3] as Int,
+                    subscriptionPriceLabel = (values[4] as? com.android.billingclient.api.ProductDetails)
+                        ?.subscriptionOfferDetails?.firstOrNull()
+                        ?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice,
+                )
+            }.collect { snapshot ->
+                _state.update { current ->
+                    current.copy(
+                        isSubscribed = snapshot.isSubscribed,
+                        spicyModeActive = snapshot.spicyModeActive,
+                        spicyModeGrantedUntil = snapshot.spicyModeGrantedUntil,
+                        spicyCreditMinutesRemainingToday = snapshot.spicyCreditMinutesRemainingToday,
+                        subscriptionPriceLabel = snapshot.subscriptionPriceLabel,
+                    )
+                }
             }
         }
     }
@@ -416,6 +564,15 @@ class SettingsViewModel @Inject constructor(
         val speechSpeed: Float,
         val proactiveMessagesEnabled: Boolean,
         val notificationFrequency: String,
+        val selectedModelVariant: ModelVariant,
+    )
+
+    private data class MonetizationSnapshot(
+        val isSubscribed: Boolean,
+        val spicyModeActive: Boolean,
+        val spicyModeGrantedUntil: Long?,
+        val spicyCreditMinutesRemainingToday: Int,
+        val subscriptionPriceLabel: String?,
     )
 
     private fun Long.toReadableSize(): String {
@@ -436,5 +593,6 @@ class SettingsViewModel @Inject constructor(
 
     companion object {
         private const val MAX_PERSONALITY_TRAITS = 3
+        private const val MINIMUM_AGE = 18
     }
 }

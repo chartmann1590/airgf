@@ -16,6 +16,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +52,7 @@ fun ChatBubble(
     modifier: Modifier = Modifier,
     displayContent: String = message.content,
     onImageClick: (String) -> Unit = {},
+    onReport: (Message) -> Unit = {},
 ) {
     if (message.isUser) {
         UserChatBubble(
@@ -67,6 +72,7 @@ fun ChatBubble(
             showAvatar = showAvatar,
             modifier = modifier,
             onImageClick = onImageClick,
+            onReport = { onReport(message) },
         )
     }
 }
@@ -156,6 +162,7 @@ private fun GfChatBubble(
     showAvatar: Boolean,
     modifier: Modifier = Modifier,
     onImageClick: (String) -> Unit,
+    onReport: () -> Unit,
 ) {
     val bubbleShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp)
     Row(
@@ -208,12 +215,17 @@ private fun GfChatBubble(
                     }
                 }
             }
-            Text(
-                text = formatChatTime(timestamp),
-                modifier = Modifier.padding(top = 4.dp, start = 4.dp),
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = MaterialTheme.typography.labelMedium.fontSize * 0.85f),
-                color = OnSurfaceVariant.copy(alpha = 0.6f),
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = formatChatTime(timestamp),
+                    modifier = Modifier.padding(start = 4.dp),
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = MaterialTheme.typography.labelMedium.fontSize * 0.85f),
+                    color = OnSurfaceVariant.copy(alpha = 0.6f),
+                )
+                IconButton(onClick = onReport, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Outlined.Flag, contentDescription = "Report AI response", modifier = Modifier.size(16.dp), tint = OnSurfaceVariant)
+                }
+            }
         }
     }
 }

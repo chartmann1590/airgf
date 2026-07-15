@@ -9,6 +9,7 @@ import com.airgf.app.domain.model.RelationshipType
 import com.airgf.app.domain.model.UserProfile
 import com.airgf.app.domain.model.VisualTemplate
 import com.airgf.app.domain.model.VoiceOption
+import com.airgf.app.domain.model.CompanionPresentation
 import com.airgf.app.domain.repository.GfConfigRepository
 import com.airgf.app.domain.repository.UserRepository
 import com.airgf.app.notification.ProactiveMessageScheduler
@@ -64,8 +65,21 @@ class OnboardingViewModel @Inject constructor(
         _state.update { it.copy(gfName = name) }
     }
 
+    fun updateCompanionPresentation(presentation: CompanionPresentation) {
+        ttsManager.setPresentation(presentation)
+        _state.update { current ->
+            current.copy(
+                companionPresentation = presentation,
+                visualTemplate = current.visualTemplate.takeIf { it.supports(presentation) }
+                    ?: VisualTemplate.entries.first { it.supports(presentation) },
+            )
+        }
+        ttsManager.setAvatar(_state.value.visualTemplate)
+    }
+
     fun updateVisualTemplate(template: VisualTemplate) {
         _state.update { it.copy(visualTemplate = template) }
+        ttsManager.setAvatar(template)
     }
 
     fun togglePersonalityTrait(trait: PersonalityTrait) {
@@ -90,6 +104,8 @@ class OnboardingViewModel @Inject constructor(
 
     fun previewVoice(option: VoiceOption) {
         updateVoiceOption(option)
+        ttsManager.setPresentation(_state.value.companionPresentation)
+        ttsManager.setAvatar(_state.value.visualTemplate)
         ttsManager.previewVoice(option)
     }
 
@@ -143,6 +159,7 @@ class OnboardingViewModel @Inject constructor(
                         relationshipType = s.relationshipType,
                         voiceOption = s.voiceOption,
                         spicyModeEnabled = false,
+                        presentation = s.companionPresentation,
                     ),
                 )
                 userRepository.setOnboardingComplete(true)

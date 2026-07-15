@@ -5,19 +5,24 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.airgf.app.ads.ConsentManager
 import com.airgf.app.core.util.ImageStorageUtil
+import com.airgf.app.data.repository.AiReportRepository
 import com.airgf.app.domain.model.GfProfile
 import com.airgf.app.domain.model.Message
 import com.airgf.app.domain.model.UserProfile
 import com.airgf.app.domain.repository.ChatRepository
 import com.airgf.app.domain.repository.GfConfigRepository
 import com.airgf.app.domain.repository.ModelRepository
+import com.airgf.app.domain.repository.SubscriptionRepository
 import com.airgf.app.domain.repository.UserRepository
 import com.airgf.app.animation.CharacterAnimationController
 import com.airgf.app.domain.model.EmotionState
 import com.airgf.app.domain.usecase.BuildSystemPromptUseCase
+import com.airgf.app.domain.usecase.GetEffectiveSpicyModeUseCase
 import com.airgf.app.domain.usecase.SendMessageEvent
 import com.airgf.app.domain.usecase.SendMessageUseCase
+import com.airgf.app.domain.usecase.RetrieveMemoriesUseCase
 import com.airgf.app.llm.LlmEngine
 import com.airgf.app.llm.LlmSession
 import com.airgf.app.tts.LipSyncBridge
@@ -49,6 +54,8 @@ data class ChatUiState(
     val pendingImageBitmap: Bitmap? = null,
     val pendingImagePath: String? = null,
     val showAttachmentOptions: Boolean = false,
+    val spicyModeActive: Boolean = false,
+    val isSubscribed: Boolean = false,
 )
 
 @HiltViewModel
@@ -64,7 +71,14 @@ class ChatViewModel @Inject constructor(
     private val lipSyncBridge: LipSyncBridge,
     private val animationController: CharacterAnimationController,
     private val imageStorageUtil: ImageStorageUtil,
+    private val retrieveMemoriesUseCase: RetrieveMemoriesUseCase,
+    private val aiReportRepository: AiReportRepository,
+    private val subscriptionRepository: SubscriptionRepository,
+    private val getEffectiveSpicyModeUseCase: GetEffectiveSpicyModeUseCase,
+    private val consentManager: ConsentManager,
 ) : ViewModel() {
+
+    val canRequestAds: Boolean get() = consentManager.canRequestAds
 
     private val _state = MutableStateFlow(ChatUiState())
     val state: StateFlow<ChatUiState> = _state.asStateFlow()
@@ -72,6 +86,7 @@ class ChatViewModel @Inject constructor(
     private var conversationId: Long = 0
     private var session: LlmSession? = null
     private var sendJob: Job? = null
+    private var visemeJob: Job? = null
     private var hasObservedProfileState = false
 
     init {
@@ -83,6 +98,18 @@ class ChatViewModel @Inject constructor(
                 launch {
                     chatRepository.getMessagesFlow(conversationId).collect { messages ->
                         _state.update { current -> current.copy(messages = messages) }
+                    }
+                }
+
+                launch {
+                    getEffectiveSpicyModeUseCase.flow().collect { active ->
+                        _state.update { current -> current.copy(spicyModeActive = active) }
+                    }
+                }
+
+                launch {
+                    subscriptionRepository.isSubscribedFlow().collect { subscribed ->
+                        _state.update { current -> current.copy(isSubscribed = subscribed) }
                     }
                 }
 
@@ -100,11 +127,16 @@ class ChatViewModel @Inject constructor(
                                 userProfile = userProfile,
                             )
                         }
-                        gfProfile?.voiceOption?.let(ttsManager::setVoice)
+                        gfProfile?.let { profile ->
+                            ttsManager.setPresentation(profile.presentation)
+                            ttsManager.setAvatar(profile.visualTemplate)
+                            ttsManager.setVoice(profile.voiceOption)
+                        }
                         val shouldRefreshSession = hasObservedProfileState &&
                             (previous.gfProfile != gfProfile || previous.userProfile != userProfile)
                         hasObservedProfileState = true
                         if (shouldRefreshSession) {
+                            sendJob?.cancel()
                             recreateSession()
                         }
                     }
@@ -227,9 +259,7 @@ class ChatViewModel @Inject constructor(
 
         sendJob?.cancel()
         sendJob = viewModelScope.launch {
-            if (session == null) {
-                recreateSession()
-            }
+            recreateSession(text)
             val activeSession = session ?: run {
                 _state.update { it.copy(error = "Chat session not ready", isGenerating = false) }
                 return@launch
@@ -283,8 +313,13 @@ class ChatViewModel @Inject constructor(
 
     fun toggleSpicyMode() {
         val gf = _state.value.gfProfile ?: return
+        val enabling = !gf.spicyModeEnabled
         viewModelScope.launch {
-            val updated = gf.copy(spicyModeEnabled = !gf.spicyModeEnabled)
+            if (enabling && !subscriptionRepository.isSubscribed()) {
+                _state.update { it.copy(error = "Spicy Mode needs a subscription or ad credits - unlock it in Settings.") }
+                return@launch
+            }
+            val updated = gf.copy(spicyModeEnabled = enabling)
             gfConfigRepository.saveProfile(updated)
             _state.update { it.copy(gfProfile = updated) }
             recreateSession()
@@ -313,6 +348,20 @@ class ChatViewModel @Inject constructor(
 
     fun clearError() {
         _state.update { it.copy(error = null) }
+    }
+
+    fun reportMessage(message: Message, reason: String = "Offensive or unsafe") {
+        if (message.isUser) return
+        viewModelScope.launch {
+            val context = _state.value.messages
+                .takeWhile { it.id != message.id }
+                .takeLast(2)
+                .joinToString("\n") { if (it.isUser) "User: ${it.content}" else "AI: ${it.content}" }
+            val delivered = aiReportRepository.report(message, reason, context.ifBlank { null })
+            _state.update {
+                it.copy(error = if (delivered) "Report sent. Thank you." else "Report saved and will remain on this device until reporting is configured.")
+            }
+        }
     }
 
     private suspend fun initializeLlm(force: Boolean = false) {
@@ -345,15 +394,15 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    private suspend fun recreateSession() {
-        sendJob?.cancel()
+    private suspend fun recreateSession(memoryQuery: String = "") {
         runCatching { session?.close() }
         session = null
 
         if (llmEngine.state.value !is LlmEngine.LlmState.Ready) return
 
         try {
-            val systemPrompt = buildSystemPromptUseCase()
+            val memories = retrieveMemoriesUseCase(memoryQuery)
+            val systemPrompt = buildSystemPromptUseCase(memories)
             val history = chatRepository.getRecentMessages(HISTORY_LIMIT)
                 .sortedBy { it.timestamp }
             session = llmEngine.createSession(systemPrompt, history)
@@ -364,6 +413,7 @@ class ChatViewModel @Inject constructor(
 
     override fun onCleared() {
         sendJob?.cancel()
+        visemeJob?.cancel()
         ttsManager.stop()
         runCatching { session?.close() }
         session = null
@@ -374,7 +424,10 @@ class ChatViewModel @Inject constructor(
         ttsManager.speak(
             text = text,
             onWordStart = { word ->
-                animationController.setMouthShape(lipSyncBridge.getVisemeForWord(word))
+                visemeJob?.cancel()
+                visemeJob = viewModelScope.launch {
+                    lipSyncBridge.animateWord(word, animationController::setMouthShape)
+                }
             },
             onDone = {
                 animationController.setMouthShape(LipSyncBridge.MouthShape.CLOSED)

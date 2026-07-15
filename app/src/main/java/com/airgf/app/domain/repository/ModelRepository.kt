@@ -2,6 +2,7 @@ package com.airgf.app.domain.repository
 
 import com.airgf.app.data.model.DownloadState
 import kotlinx.coroutines.flow.Flow
+import com.airgf.app.llm.ModelVariant
 
 interface ModelRepository {
     suspend fun isModelDownloaded(): Boolean
@@ -11,4 +12,7 @@ interface ModelRepository {
     fun isNetworkAvailable(): Boolean
     fun hasSufficientStorage(): Boolean
     fun downloadModel(): Flow<DownloadState>
+    fun selectedVariantFlow(): Flow<ModelVariant>
+    suspend fun getSelectedVariant(): ModelVariant
+    suspend fun setSelectedVariant(variant: ModelVariant)
 }

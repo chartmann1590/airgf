@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -23,6 +24,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.airgf.app.ads.AdCoordinatorViewModel
+import com.airgf.app.ads.findActivity
 import com.airgf.app.presentation.onboarding.GfCustomizationScreen
 import com.airgf.app.presentation.onboarding.ImageModelDownloadScreen
 import com.airgf.app.presentation.onboarding.ModelDownloadScreen
@@ -54,6 +57,21 @@ fun AirGfNavGraph(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val notificationEventCount = openChatFromNotificationEvents?.collectAsStateWithLifecycle()?.value ?: 0
+
+    val context = LocalContext.current
+    val adCoordinator: AdCoordinatorViewModel = hiltViewModel()
+    val isSubscribed by adCoordinator.isSubscribed.collectAsStateWithLifecycle()
+    val mainTabRoutes = remember {
+        setOf(Route.Chat.path, Route.Call.path, Route.Character.path, Route.Settings.path)
+    }
+
+    LaunchedEffect(currentRoute, isSubscribed) {
+        if (!isSubscribed && currentRoute in mainTabRoutes) {
+            context.findActivity()?.let { activity ->
+                adCoordinator.interstitialAdManager.showIfReady(activity)
+            }
+        }
+    }
 
     LaunchedEffect(notificationEventCount) {
         if (notificationEventCount <= 0) return@LaunchedEffect

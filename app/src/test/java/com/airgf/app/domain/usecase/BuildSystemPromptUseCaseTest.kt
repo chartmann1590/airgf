@@ -9,6 +9,7 @@ import com.airgf.app.domain.model.VisualTemplate
 import com.airgf.app.domain.model.VoiceOption
 import com.airgf.app.testutil.FakeGfConfigRepository
 import com.airgf.app.testutil.FakeImageGenRepository
+import com.airgf.app.testutil.FakeSubscriptionRepository
 import com.airgf.app.testutil.FakeUserRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertThrows
@@ -38,24 +39,32 @@ class BuildSystemPromptUseCaseTest {
             ),
         )
 
-        val prompt = BuildSystemPromptUseCase(gfRepository, userRepository, FakeImageGenRepository())()
+        val subscriptionRepository = FakeSubscriptionRepository(isSubscribed = true)
+        val prompt = BuildSystemPromptUseCase(
+            gfRepository,
+            userRepository,
+            FakeImageGenRepository(),
+            GetEffectiveSpicyModeUseCase(subscriptionRepository, gfRepository),
+        )()
 
         assertTrue(prompt.contains("You are Mina, a virtual girlfriend."))
         assertTrue(prompt.contains("Your partner's name is Alex."))
         assertTrue(prompt.contains(RelationshipType.ROMANTIC.description))
         assertTrue(prompt.contains(PersonalityTrait.ROMANTIC.promptFragment))
         assertTrue(prompt.contains(PersonalityTrait.PLAYFUL.promptFragment))
-        assertTrue(prompt.contains("MODE: Romantic/Flirty"))
+        assertTrue(prompt.contains("MODE: Adult Romantic/Flirty"))
         assertTrue(prompt.contains("Additional personality: She loves stargazing."))
         assertTrue(prompt.contains("Your partner enjoys: music, games."))
     }
 
     @Test
     fun `throws when girlfriend profile is missing`() {
+        val gfConfigRepository = FakeGfConfigRepository()
         val useCase = BuildSystemPromptUseCase(
-            gfConfigRepository = FakeGfConfigRepository(),
+            gfConfigRepository = gfConfigRepository,
             userRepository = FakeUserRepository(),
             imageGenRepository = FakeImageGenRepository(),
+            getEffectiveSpicyModeUseCase = GetEffectiveSpicyModeUseCase(FakeSubscriptionRepository(), gfConfigRepository),
         )
 
         assertThrows(IllegalStateException::class.java) {
