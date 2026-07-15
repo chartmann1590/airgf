@@ -19,6 +19,64 @@ android {
         versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val reportEndpoint = System.getenv("AIRGF_REPORT_ENDPOINT").orEmpty()
+        buildConfigField("String", "REPORT_ENDPOINT", "\"$reportEndpoint\"")
+
+        val ghToken: String = run {
+            val propsFile = rootProject.file("local.properties")
+            if (!propsFile.exists()) {
+                System.getenv("GH_API_TOKEN") ?: ""
+            } else {
+                var token = System.getenv("GH_API_TOKEN") ?: ""
+                if (token.isEmpty()) {
+                    propsFile.forEachLine { line ->
+                        val trimmed = line.trim()
+                        if (trimmed.startsWith("github.api.token=")) {
+                            token = trimmed.removePrefix("github.api.token=").trim()
+                        }
+                    }
+                }
+                token
+            }
+        }
+        val ghOwner: String = run {
+            val propsFile = rootProject.file("local.properties")
+            if (!propsFile.exists()) {
+                System.getenv("GH_REPO_OWNER") ?: ""
+            } else {
+                var owner = System.getenv("GH_REPO_OWNER") ?: ""
+                if (owner.isEmpty()) {
+                    propsFile.forEachLine { line ->
+                        val trimmed = line.trim()
+                        if (trimmed.startsWith("github.repo.owner=")) {
+                            owner = trimmed.removePrefix("github.repo.owner=").trim()
+                        }
+                    }
+                }
+                owner
+            }
+        }
+        val ghRepo: String = run {
+            val propsFile = rootProject.file("local.properties")
+            if (!propsFile.exists()) {
+                System.getenv("GH_REPO_NAME") ?: ""
+            } else {
+                var repo = System.getenv("GH_REPO_NAME") ?: ""
+                if (repo.isEmpty()) {
+                    propsFile.forEachLine { line ->
+                        val trimmed = line.trim()
+                        if (trimmed.startsWith("github.repo.name=")) {
+                            repo = trimmed.removePrefix("github.repo.name=").trim()
+                        }
+                    }
+                }
+                repo
+            }
+        }
+        buildConfigField("String", "GITHUB_API_TOKEN", "\"$ghToken\"")
+        buildConfigField("String", "GITHUB_REPO_OWNER", "\"$ghOwner\"")
+        buildConfigField("String", "GITHUB_REPO_NAME", "\"$ghRepo\"")
+        buildConfigField("String", "FEEDBACK_ASSETS_DIR", "\"feedback-assets\"")
     }
 
     signingConfigs {
@@ -59,6 +117,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -106,6 +165,14 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.litertlm.android)
+    // LiteRT-LM 0.14.0's Android binary calls SendChannel.close$default.
+    // That bridge is present in coroutine 1.11 but absent from the 1.10 dependency graph.
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0") {
+        version { strictly("1.11.0") }
+    }
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0") {
+        version { strictly("1.11.0") }
+    }
 
     implementation(libs.okhttp)
 
@@ -120,6 +187,7 @@ dependencies {
     implementation(libs.sceneview)
 
     implementation(libs.coil.compose)
+    implementation(libs.mlkit.genai.image.description)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

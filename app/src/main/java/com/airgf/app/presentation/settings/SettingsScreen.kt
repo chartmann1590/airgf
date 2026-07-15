@@ -54,6 +54,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -94,6 +96,10 @@ import com.airgf.app.presentation.theme.OnSurface
 import com.airgf.app.presentation.theme.OnSurfaceVariant
 import com.airgf.app.presentation.theme.OutlineVariant
 import com.airgf.app.presentation.theme.Primary
+import com.airgf.app.domain.model.CompanionMemory
+import com.airgf.app.domain.model.MemoryState
+import com.airgf.app.domain.model.CompanionPresentation
+import com.airgf.app.llm.ModelVariant
 import com.airgf.app.presentation.theme.SurfaceContainerHigh
 import kotlinx.coroutines.launch
 
@@ -121,6 +127,10 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var activeEditor by remember { mutableStateOf<SettingsEditor?>(null) }
+    var confirmSpicyMode by remember { mutableStateOf(false) }
+    var pendingMemory by remember { mutableStateOf<CompanionMemory?>(null) }
+    var chooseCompanionRole by remember { mutableStateOf(false) }
+    var chooseModelVariant by remember { mutableStateOf(false) }
     val notificationsGranted = context.hasNotificationPermission()
     val requestNotificationPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -160,6 +170,82 @@ fun SettingsScreen(
         }
     }
 
+    if (confirmSpicyMode) {
+        AlertDialog(
+            onDismissRequest = { confirmSpicyMode = false },
+            title = { Text("Enable adult romance mode?") },
+            text = { Text("This allows flirting and mild innuendo. Explicit sexual content, nudity, coercion, and content involving minors remain blocked.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setSpicyMode(true)
+                    confirmSpicyMode = false
+                }) { Text("I am 18+ - Enable") }
+            },
+            dismissButton = { TextButton(onClick = { confirmSpicyMode = false }) { Text("Cancel") } },
+        )
+    }
+
+    pendingMemory?.let { memory ->
+        val suggested = memory.state == MemoryState.SUGGESTED
+        AlertDialog(
+            onDismissRequest = { pendingMemory = null },
+            title = { Text(if (suggested) "Remember this?" else "Forget this memory?") },
+            text = { Text(memory.content) },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (suggested) viewModel.approveMemory(memory.id) else viewModel.forgetMemory(memory.id)
+                    pendingMemory = null
+                }) { Text(if (suggested) "Remember" else "Forget") }
+            },
+            dismissButton = { TextButton(onClick = { pendingMemory = null }) { Text("Cancel") } },
+        )
+    }
+
+    if (chooseCompanionRole) {
+        AlertDialog(
+            onDismissRequest = { chooseCompanionRole = false },
+            title = { Text("Companion role") },
+            text = {
+                Column {
+                    CompanionPresentation.entries.forEach { presentation ->
+                        TextButton(onClick = {
+                            viewModel.setCompanionPresentation(presentation)
+                            chooseCompanionRole = false
+                        }) {
+                            Text(presentation.relationshipNoun.replaceFirstChar { it.uppercase() })
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { chooseCompanionRole = false }) { Text("Cancel") } },
+        )
+    }
+
+    if (chooseModelVariant) {
+        AlertDialog(
+            onDismissRequest = { chooseModelVariant = false },
+            title = { Text("On-device AI model") },
+            text = {
+                Column {
+                    ModelVariant.entries.forEach { variant ->
+                        TextButton(onClick = {
+                            viewModel.setModelVariant(variant)
+                            chooseModelVariant = false
+                        }) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(variant.displayName)
+                                Text(variant.qualityDescription, style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { chooseModelVariant = false }) { Text("Cancel") } },
+        )
+    }
+
     GradientBackground(showRadialGlow = true) {
         Scaffold(
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -196,9 +282,15 @@ fun SettingsScreen(
                 ) {
                     item {
                         SettingsSection(
-                            title = "Her Profile",
+                            title = "Companion Profile",
                             icon = Icons.Default.Favorite,
                         ) {
+                            SettingsRow(
+                                title = "AI Quality",
+                                subtitle = uiState.selectedModelVariant.qualityDescription,
+                                value = uiState.selectedModelVariant.displayName,
+                                onClick = { chooseModelVariant = true },
+                            )
                             SettingsRow(
                                 title = "Name",
                                 value = uiState.gfProfile?.name.orEmpty(),
@@ -217,7 +309,7 @@ fun SettingsScreen(
                             )
                             SettingsRow(
                                 title = "Custom Notes",
-                                subtitle = uiState.gfProfile?.customPromptAdditions ?: "Add extra notes for her personality and vibe.",
+                                subtitle = uiState.gfProfile?.customPromptAdditions ?: "Add extra notes for their personality and vibe.",
                                 onClick = { activeEditor = SettingsEditor.CustomNotes },
                             )
                         }
@@ -251,11 +343,18 @@ fun SettingsScreen(
                             title = "Modes & Behavior",
                             icon = Icons.Default.AutoAwesome,
                         ) {
+                            SettingsRow(
+                                title = "Companion Role",
+                                value = uiState.gfProfile?.presentation?.relationshipNoun?.replaceFirstChar { it.uppercase() }.orEmpty(),
+                                onClick = { chooseCompanionRole = true },
+                            )
                             SettingsToggleRow(
                                 title = "Spicy Mode",
-                                subtitle = "Allow more intimate interactions.",
+                                subtitle = "Adult flirting and mild innuendo. Explicit content stays blocked.",
                                 checked = uiState.gfProfile?.spicyModeEnabled == true,
-                                onCheckedChange = viewModel::setSpicyMode,
+                                onCheckedChange = { enabled ->
+                                    if (enabled) confirmSpicyMode = true else viewModel.setSpicyMode(false)
+                                },
                             )
                         }
                     }
@@ -267,7 +366,7 @@ fun SettingsScreen(
                         ) {
                             SettingsToggleRow(
                                 title = "Text to Speech",
-                                subtitle = "Speak her replies out loud after each message.",
+                                subtitle = "Speak their replies out loud after each message.",
                                 checked = uiState.ttsEnabled,
                                 onCheckedChange = viewModel::setTtsEnabled,
                             )
@@ -293,9 +392,9 @@ fun SettingsScreen(
                                 subtitle = if (!notificationsGranted &&
                                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                                 ) {
-                                    "Let her check in on you during the day. Android will ask for notification permission first."
+                                    "Let your companion check in during the day. Android will ask for notification permission first."
                                 } else {
-                                    "Let her check in on you during the day."
+                                    "Let your companion check in during the day."
                                 },
                                 checked = uiState.proactiveMessagesEnabled,
                                 onCheckedChange = { enabled ->
@@ -321,6 +420,31 @@ fun SettingsScreen(
                             title = "Data",
                             icon = Icons.Default.Storage,
                         ) {
+                            SettingsRow(
+                                title = "Companion Memory",
+                                subtitle = if (uiState.memories.isEmpty()) {
+                                    "No saved memories yet. Suggestions appear as you chat."
+                                } else {
+                                    "${uiState.memories.count { it.state == MemoryState.APPROVED }} remembered, ${uiState.memories.count { it.state == MemoryState.SUGGESTED }} awaiting review"
+                                },
+                                onClick = { uiState.memories.firstOrNull()?.let { pendingMemory = it } },
+                                enabled = uiState.memories.isNotEmpty(),
+                            )
+                            uiState.memories.take(4).forEach { memory ->
+                                SettingsRow(
+                                    title = memory.content,
+                                    subtitle = if (memory.state == MemoryState.SUGGESTED) "Review suggestion" else "Remembered - tap to manage",
+                                    onClick = { pendingMemory = memory },
+                                )
+                            }
+                            if (uiState.memories.isNotEmpty()) {
+                                SettingsRow(
+                                    title = "Forget All Memories",
+                                    subtitle = "Delete learned details without deleting chat history.",
+                                    onClick = viewModel::forgetAllMemories,
+                                    destructive = true,
+                                )
+                            }
                             SettingsRow(
                                 title = "Export Chat History",
                                 subtitle = if (uiState.isExporting) {
@@ -411,6 +535,10 @@ fun SettingsScreen(
                     }
 
                     item {
+                        FeedbackSection()
+                    }
+
+                    item {
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -427,9 +555,9 @@ fun SettingsScreen(
         }
         SettingsEditor.GfName -> {
             TextValueEditorDialog(
-                title = "Edit Her Name",
+                title = "Edit Companion Name",
                 initialValue = uiState.gfProfile?.name.orEmpty(),
-                placeholder = "Enter her name",
+                placeholder = "Enter their name",
                 onDismiss = { activeEditor = null },
                 onConfirm = {
                     viewModel.updateGfName(it)
@@ -440,6 +568,7 @@ fun SettingsScreen(
         SettingsEditor.Appearance -> {
             AppearancePickerDialog(
                 selected = uiState.gfProfile?.visualTemplate,
+                presentation = uiState.gfProfile?.presentation ?: CompanionPresentation.FEMININE,
                 onDismiss = { activeEditor = null },
                 onSelected = viewModel::updateVisualTemplate,
             )
@@ -545,7 +674,7 @@ private fun SettingsTopBar() {
                         color = OnSurface,
                     )
                     Text(
-                        text = "Tune her personality, voice, and behavior.",
+                        text = "Tune their personality, voice, and behavior.",
                         style = MaterialTheme.typography.bodySmall,
                         color = OnSurfaceVariant,
                     )
@@ -611,9 +740,10 @@ private fun LoadingBlock(
 }
 
 @Composable
-private fun SettingsSection(
+internal fun SettingsSection(
     title: String,
     icon: ImageVector,
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     GlassPanel(
@@ -864,7 +994,7 @@ private fun NotificationFrequencyRow(
             color = OnSurface,
         )
         Text(
-            text = "How often she should check in when proactive messages are enabled.",
+            text = "How often your companion should check in when proactive messages are enabled.",
             style = MaterialTheme.typography.bodySmall,
             color = OnSurfaceVariant,
             modifier = Modifier.padding(top = 2.dp, bottom = 10.dp),
@@ -973,7 +1103,7 @@ private fun PersonalityEditorDialog(
                     color = OnSurface,
                 )
                 Text(
-                    text = "Pick up to 3 traits that shape how she talks and behaves.",
+                    text = "Pick up to 3 traits that shape how your companion talks and behaves.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = OnSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
@@ -1007,11 +1137,13 @@ private fun PersonalityEditorDialog(
 @Composable
 private fun AppearancePickerDialog(
     selected: VisualTemplate?,
+    presentation: CompanionPresentation,
     onDismiss: () -> Unit,
     onSelected: (VisualTemplate) -> Unit,
 ) {
     var previewTemplate by remember(selected) {
-        mutableStateOf(selected ?: VisualTemplate.entries.first())
+        mutableStateOf(selected?.takeIf { it.supports(presentation) }
+            ?: VisualTemplate.entries.first { it.supports(presentation) })
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -1052,7 +1184,7 @@ private fun AppearancePickerDialog(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    VisualTemplate.entries.toList().chunked(2).forEach { rowTemplates ->
+                    VisualTemplate.entries.filter { it.supports(presentation) }.chunked(2).forEach { rowTemplates ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -1110,7 +1242,7 @@ private fun VoiceSelectionDialog(
                     color = OnSurface,
                 )
                 Text(
-                    text = "Pick how she sounds when text-to-speech is enabled.",
+                    text = "Pick how your companion sounds when text-to-speech is enabled.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = OnSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
@@ -1174,7 +1306,7 @@ private fun InterestsEditorDialog(
                     color = OnSurface,
                 )
                 Text(
-                    text = "Add or remove the topics she should know you care about.",
+                    text = "Add or remove the topics your companion should know you care about.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = OnSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
