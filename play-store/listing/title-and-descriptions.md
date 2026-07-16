@@ -1,82 +1,80 @@
 # Store Listing Copy
 
-The app supports both an AI girlfriend and an AI boyfriend (user picks the
-companion) — naming and copy should reflect that, and should lean into terms
-people actually search for rather than avoiding them. Competitor apps in this
-exact category (Amora, Liora AI GF, Mia: AI Girlfriend) use "AI Girlfriend" /
-"AI Boyfriend" directly in their titles and are live on Play, so the earlier
-instinct to avoid those words entirely was overcautious — the real policy risk
-is explicit sexual content, not the words "girlfriend"/"boyfriend" themselves.
+The app supports both an AI girlfriend and an AI boyfriend companion (user picks) —
+naming and copy lean into the terms people actually search for ("AI girlfriend",
+"AI boyfriend", "virtual companion") rather than avoiding them. Competitor apps
+(Amora, Liora AI GF, Mia: AI Girlfriend) use these terms directly in titles and are
+live on Play — the real policy risk is explicit sexual content, not the words
+"girlfriend"/"boyfriend" themselves.
+
+This file is the source of truth uploaded by `play-store/scripts/upload_listing.py`.
+Keep it in sync if you edit copy by hand.
 
 ## App name (30 char max)
 ```
 Amoura - AI Girlfriend App
 ```
-(26 chars — "AI Girlfriend" is the higher-volume search term of the pair;
-short description below covers the "AI boyfriend" search term so both are
-indexed without cramming both into the 30-char title.)
+(26 chars)
 
 ## Short description (80 char max)
 ```
-Your AI girlfriend or boyfriend — private, on-device, always yours.
+AI girlfriend & AI boyfriend chat companion - private, on-device, always yours
 ```
-(69 chars)
+(78 chars)
 
 ## Full description (4000 char max)
 
 ```
-Amoura is a private AI girlfriend or boyfriend that lives entirely on your
-phone — no accounts, no cloud, no data collection. Choose your companion and
-customize their look, personality, and voice.
+Amoura is your private AI girlfriend or boyfriend - a virtual companion that lives entirely on your phone. No accounts, no cloud, no data collection. Just you and your AI companion, always available.
 
-Powered by an on-device AI model, Amoura learns your preferences, remembers
-your conversations, and adapts to how you like to talk. Every conversation
-stays on your device.
+Whether you're looking for an AI girlfriend, an AI boyfriend, or just a caring virtual companion to talk to, Amoura adapts to you. Pick their look, personality, voice, and relationship style, and start chatting in minutes.
 
-FEATURES
+WHY PEOPLE LOVE AMOURA
 
-On-Device AI
-Conversations are processed entirely on your phone. No internet connection
-required, no servers involved.
+On-Device AI - Every conversation runs locally using an on-device AI model (Gemma 4). No internet required to chat, no servers involved, nothing about your conversations ever leaves your phone.
 
-3D Avatar
-Choose from a range of 3D characters with real-time expressions, lip sync,
-and idle animation that respond to your conversation.
+Choose Your Companion - Girlfriend, boyfriend, or partner. Pick their name, appearance, personality traits, and communication style.
 
-Photo Sharing
-Share photos and your companion can understand and respond to images, or
-generate pictures on-device.
+3D Avatars - Multiple unique 3D characters with real-time emotional expressions, lip sync, and idle animation that make your companion feel alive.
 
-Voice & Calls
-Talk with multiple voice profiles and natural lip-synced responses.
+Photo Sharing - Send photos and your AI companion understands and reacts to them, or generate images together using on-device Stable Diffusion.
 
-Personalization
-Set personality traits, communication style, and relationship dynamic — your
-companion adapts to you over time.
+Voice & Lip Sync - Multiple voice profiles with natural, word-level lip-synced speech.
 
-Proactive Check-ins
-Your companion can reach out on its own, with a frequency you control.
+Memory & Personality - Your companion remembers what matters to you and adapts their personality and communication style over time.
 
-100% Private
-Everything happens on your device. No account required, no cloud sync, no
-telemetry beyond optional crash reporting you can disable in Settings.
+Proactive Messages - Your AI girlfriend or boyfriend can reach out to you first, on a schedule you control.
 
-Amoura is intended for adult users (18+). It contains romantic and
-relationship-oriented content and conversation.
+Spicy Mode - Romantic and flirty conversation, off by default. Unlock it permanently with a subscription (which also removes all ads), or temporarily by watching a rewarded ad - up to 4 hours a day, free.
+
+100% Private - On-device conversations, no account required, no chat data collection.
+
+Amoura is a free AI companion app, supported by ads, with an optional subscription for an ad-free, unlimited experience.
+
+Amoura is intended for adult users (18+) and includes romantic and relationship-oriented content.
 ```
 
 ## What's new (release notes template, 500 char max)
 ```
-Welcome to Amoura! (Previously AirGF — same app, new name.)
+Welcome to Amoura! (Previously AirGF - same app, new name.) Added ads, an optional ad-free subscription, and Spicy Mode credits.
 ```
 
 ---
 
+### ASO notes
+- Title leads with the highest-volume search term ("AI Girlfriend"); short
+  description covers "AI boyfriend" so both are indexed.
+- Full description repeats "AI girlfriend" / "AI boyfriend" / "AI companion" /
+  "virtual companion" naturally across different sentences - enough for
+  discovery without reading as keyword-stuffed (Play's ranking system
+  penalizes unnatural repetition).
+- Feature bullets double as keyword coverage: "3D avatar", "on-device AI",
+  "photo sharing", "voice chat" are all real search terms for this category.
+
 ### Compliance checklist for this copy
-- [ ] No explicit sexual terms in title/short description (ML-scanned pre-review)
-- [ ] Age-appropriate framing: "romantic and relationship-oriented content",
+- [x] No explicit sexual terms in title/short description (ML-scanned pre-review)
+- [x] Age-appropriate framing: "romantic and relationship-oriented content",
       not explicit descriptions
-- [ ] Matches actual in-app content — don't promise features that were removed
-      (e.g. verify the 14-model claim in README.md is still accurate before
-      publishing, and update the model/voice/trait counts if they've changed)
-- [ ] Rename note included so existing docs/links to "AirGF" aren't confusing
+- [ ] Matches actual in-app content - verify feature claims (3D avatar count,
+      voice profile count) still match the shipped app before publishing
+- [x] Rename note included so existing docs/links to "AirGF" aren't confusing

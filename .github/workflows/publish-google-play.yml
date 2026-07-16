@@ -117,6 +117,19 @@ jobs:
           fi
           echo "Service account secret is present"
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Play Developer API client
+        run: pip install --quiet google-api-python-client google-auth
+
+      - name: Upload store listing text and graphics
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python play-store/scripts/upload_listing.py
+
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1.1.5
         with:
@@ -124,6 +137,6 @@ jobs:
           packageName: com.airgf.app
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: production
-          status: completed
+          status: draft
           whatsNewDirectory: distribution/whatsnew
           mappingFile: app/build/outputs/mapping/release/mapping.txt
