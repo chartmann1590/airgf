@@ -82,10 +82,10 @@ jobs:
           GH_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
           GH_REPO_OWNER: ${{ secrets.GH_REPO_OWNER }}
           GH_REPO_NAME: ${{ secrets.GH_REPO_NAME }}
-        run: ./gradlew testReleaseUnitTest --no-daemon
+        run: gradle testReleaseUnitTest --no-daemon
 
       - name: Run lint
-        run: ./gradlew lintRelease --no-daemon
+        run: gradle lintRelease --no-daemon
 
       - name: Build Play release AAB
         env:
@@ -101,7 +101,7 @@ jobs:
           GH_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
           GH_REPO_OWNER: ${{ secrets.GH_REPO_OWNER }}
           GH_REPO_NAME: ${{ secrets.GH_REPO_NAME }}
-        run: ./gradlew bundleRelease --no-daemon
+        run: gradle bundleRelease --no-daemon
 
       - name: Upload AAB as artifact
         uses: actions/upload-artifact@v4
