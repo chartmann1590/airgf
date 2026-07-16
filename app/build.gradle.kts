@@ -21,8 +21,6 @@ android {
         versionName = System.getenv("ANDROID_VERSION_NAME") ?: "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        val reportEndpoint = System.getenv("AIRGF_REPORT_ENDPOINT").orEmpty()
-        buildConfigField("String", "REPORT_ENDPOINT", "\"$reportEndpoint\"")
 
         val ghToken: String = run {
             val propsFile = rootProject.file("local.properties")
@@ -106,6 +104,9 @@ android {
         buildConfigField("String", "ADMOB_REWARDED_UNIT_ID", "\"$admobRewardedUnitId\"")
 
         manifestPlaceholders["admobAppId"] = admobAppId
+
+        val reportEndpoint = resolveSecret("AIRGF_REPORT_ENDPOINT", "airgf.report.endpoint")
+        buildConfigField("String", "REPORT_ENDPOINT", "\"$reportEndpoint\"")
     }
 
     signingConfigs {

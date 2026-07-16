@@ -78,6 +78,7 @@ jobs:
           ADMOB_BANNER_UNIT_ID: ${{ secrets.ADMOB_BANNER_UNIT_ID }}
           ADMOB_INTERSTITIAL_UNIT_ID: ${{ secrets.ADMOB_INTERSTITIAL_UNIT_ID }}
           ADMOB_REWARDED_UNIT_ID: ${{ secrets.ADMOB_REWARDED_UNIT_ID }}
+          AIRGF_REPORT_ENDPOINT: ${{ secrets.AIRGF_REPORT_ENDPOINT }}
           GH_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
           GH_REPO_OWNER: ${{ secrets.GH_REPO_OWNER }}
           GH_REPO_NAME: ${{ secrets.GH_REPO_NAME }}
@@ -96,6 +97,7 @@ jobs:
           ADMOB_BANNER_UNIT_ID: ${{ secrets.ADMOB_BANNER_UNIT_ID }}
           ADMOB_INTERSTITIAL_UNIT_ID: ${{ secrets.ADMOB_INTERSTITIAL_UNIT_ID }}
           ADMOB_REWARDED_UNIT_ID: ${{ secrets.ADMOB_REWARDED_UNIT_ID }}
+          AIRGF_REPORT_ENDPOINT: ${{ secrets.AIRGF_REPORT_ENDPOINT }}
           GH_API_TOKEN: ${{ secrets.GH_API_TOKEN }}
           GH_REPO_OWNER: ${{ secrets.GH_REPO_OWNER }}
           GH_REPO_NAME: ${{ secrets.GH_REPO_NAME }}

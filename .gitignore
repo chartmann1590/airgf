@@ -28,3 +28,4 @@ local.properties
 
 # Stitch design files
 stitch_airgf_ai_virtual_companion/
+.wrangler/

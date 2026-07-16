@@ -52,6 +52,7 @@ jobs:
           ADMOB_REWARDED_UNIT_ID: ${{ secrets.ADMOB_REWARDED_UNIT_ID }}
           ANDROID_VERSION_CODE: ${{ steps.version.outputs.next_code }}
           ANDROID_VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          AIRGF_REPORT_ENDPOINT: ${{ secrets.AIRGF_REPORT_ENDPOINT }}
         run: gradle assembleRelease --no-daemon
 
       - name: Create GitHub Release

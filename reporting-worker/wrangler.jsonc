@@ -1,9 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "airgf-ai-reports",
+  "name": "amoura-ai-reports",
   "main": "src/index.js",
   "compatibility_date": "2026-07-14",
   "kv_namespaces": [
-    { "binding": "REPORTS", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }
+    { "binding": "REPORTS", "id": "072588f166bb45dab05b4e6e9257456a" }
   ]
 }
