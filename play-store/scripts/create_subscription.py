@@ -25,6 +25,12 @@ PRICE_USD_NANOS = 990000000  # $7.99
 PRICE_EUR_UNITS = 7
 PRICE_EUR_NANOS = 490000000  # EUR7.49
 
+# "Access to software programs or other electronic items purchased from the
+# Internet" - the general default category for an app-feature subscription
+# (not streaming media, not e-books/audiobooks/periodicals).
+# https://support.google.com/googleplay/android-developer/answer/16408159
+TAX_CATEGORY_CODE = "PTC023DIG"
+
 TITLE = "Amoura Premium"
 BENEFITS = [
     "Unlock Spicy Mode permanently",
@@ -50,7 +56,7 @@ def get_service():
 
 
 def main():
-    service = service_account_service = get_service()
+    service = get_service()
     subs = service.monetization().subscriptions()
 
     body = {
@@ -101,6 +107,7 @@ def main():
         ],
     }
 
+    existing = None
     try:
         existing = subs.get(packageName=PACKAGE_NAME, productId=SUBSCRIPTION_ID).execute()
         print(f"Subscription '{SUBSCRIPTION_ID}' already exists - skipping creation.")
@@ -132,6 +139,24 @@ def main():
             print(f"(activation call returned {e.resp.status}, likely already active): {body_text}")
         else:
             raise
+
+    current_tax_code = (existing or {}).get("taxAndComplianceSettings", {}).get("productTaxCategoryCode")
+    if current_tax_code == TAX_CATEGORY_CODE:
+        print(f"Tax category already set to '{TAX_CATEGORY_CODE}' - nothing to do.")
+    else:
+        print(f"Setting tax category to '{TAX_CATEGORY_CODE}' (was: {current_tax_code!r})...")
+        subs.patch(
+            packageName=PACKAGE_NAME,
+            productId=SUBSCRIPTION_ID,
+            updateMask="taxAndComplianceSettings.productTaxCategoryCode",
+            regionsVersion_version="2022/02",
+            body={
+                "taxAndComplianceSettings": {
+                    "productTaxCategoryCode": TAX_CATEGORY_CODE,
+                },
+            },
+        ).execute()
+        print("Tax category set.")
 
 
 if __name__ == "__main__":
