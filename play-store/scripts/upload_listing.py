@@ -53,6 +53,8 @@ Amoura is a free AI companion app, supported by ads, with an optional subscripti
 
 Amoura is intended for adult users (18+) and includes romantic and relationship-oriented content."""
 
+PROMO_VIDEO_URL = "https://youtube.com/shorts/Ed7_5IiEsg4"
+
 ICON_PATH = os.path.join(REPO_ROOT, "play-store", "graphics", "icon", "icon-512.png")
 FEATURE_GRAPHIC_PATH = os.path.join(
     REPO_ROOT, "play-store", "graphics", "feature-graphic", "feature-graphic-1024x500.png"
@@ -108,6 +110,7 @@ def main():
             "title": TITLE,
             "shortDescription": SHORT_DESCRIPTION,
             "fullDescription": FULL_DESCRIPTION,
+            "video": PROMO_VIDEO_URL,
         },
     ).execute()
     print(f"Updated store listing text ({LANGUAGE})")

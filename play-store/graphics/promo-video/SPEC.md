@@ -9,13 +9,8 @@
   screenshots or copy change — the scene compositor and narration script
   aren't checked in as reusable tooling yet, just the final output
 
-## Still needed before this appears on the Play listing
+## Status
 
-Play Store promo videos are hosted on YouTube - you don't upload a video
-file to Play Console, just paste the URL:
-
-1. Upload `amoura-promo.mp4` to a YouTube channel (unlisted or public)
-2. Put the resulting URL in `youtube-url.txt` in this folder
-3. Paste that URL into Play Console's store listing "Promo video" field
-
-I don't have YouTube upload access, so this step is manual.
+Live at https://youtube.com/shorts/Ed7_5IiEsg4 (see `youtube-url.txt`).
+Wired into `play-store/scripts/upload_listing.py` (`PROMO_VIDEO_URL`), which
+sets the `video` field on the app's Play Console listing on every run.
