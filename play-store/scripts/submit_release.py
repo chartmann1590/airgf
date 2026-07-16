@@ -45,9 +45,24 @@ def main():
         print("::error::No draft release found on the production track - nothing to submit.")
         sys.exit(1)
 
-    for release in draft_releases:
-        release["status"] = "completed"
-        print(f"Marking release {release.get('name')} (versionCodes={release.get('versionCodes')}) as completed")
+    # Play only allows one "completed" release per track. If multiple drafts
+    # stacked up (e.g. from separate publish runs), submit only the most
+    # recent one (highest version code) and drop the rest - they're
+    # superseded anyway.
+    def max_version_code(release):
+        codes = release.get("versionCodes", ["0"])
+        return max(int(c) for c in codes)
+
+    draft_releases.sort(key=max_version_code, reverse=True)
+    to_submit, *superseded = draft_releases
+    to_submit["status"] = "completed"
+    print(f"Marking release {to_submit.get('name')} (versionCodes={to_submit.get('versionCodes')}) as completed")
+
+    other_releases = [r for r in releases if r.get("status") != "draft"]
+    if superseded:
+        print(f"Dropping {len(superseded)} superseded draft release(s): "
+              f"{[r.get('name') for r in superseded]}")
+    releases = other_releases + [to_submit]
 
     edits.tracks().update(
         packageName=PACKAGE_NAME,
