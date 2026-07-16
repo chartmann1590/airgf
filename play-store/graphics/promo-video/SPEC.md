@@ -13,4 +13,7 @@
 
 Live at https://youtube.com/shorts/Ed7_5IiEsg4 (see `youtube-url.txt`).
 Wired into `play-store/scripts/upload_listing.py` (`PROMO_VIDEO_URL`), which
-sets the `video` field on the app's Play Console listing on every run.
+sets the `video` field on the app's Play Console listing. Run the
+**"Update Play Store Listing"** GitHub Actions workflow to apply listing/
+graphics/video changes — it does not build or upload a new release, unlike
+**"Publish to Google Play"**, which is for actual app releases (new AAB).
