@@ -30,22 +30,10 @@ jobs:
       - name: Determine next version
         id: version
         run: |
-          CURRENT=$(grep 'versionCode' app/build.gradle.kts | head -1 | grep -o '[0-9]\+')
-          NEXT=$((CURRENT + 1))
-          CURRENT_NAME=$(grep 'versionName' app/build.gradle.kts | head -1 | grep -o '"[^"]*"' | tr -d '"')
-
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_NAME"
-          NEW_PATCH=$((PATCH + 1))
-          NEW_NAME="${MAJOR}.${MINOR}.${NEW_PATCH}"
-
-          echo "current_code=$CURRENT" >> $GITHUB_OUTPUT
-          echo "next_code=$NEXT" >> $GITHUB_OUTPUT
-          echo "version_name=$NEW_NAME" >> $GITHUB_OUTPUT
-
-      - name: Bump version in build.gradle.kts
-        run: |
-          sed -i "s/versionCode = ${{ steps.version.outputs.current_code }}/versionCode = ${{ steps.version.outputs.next_code }}/" app/build.gradle.kts
-          sed -i "s/versionName = \"[^\"]*\"/versionName = \"${{ steps.version.outputs.version_name }}\"/" app/build.gradle.kts
+          version_code="$(date -u +'%y%j%H%M')"
+          version_name="1.0.4.$(date -u +'%Y%m%d.%H%M')"
+          echo "next_code=${version_code}" >> "${GITHUB_OUTPUT}"
+          echo "version_name=${version_name}" >> "${GITHUB_OUTPUT}"
 
       - name: Decode keystore
         env:
@@ -62,23 +50,17 @@ jobs:
           ADMOB_BANNER_UNIT_ID: ${{ secrets.ADMOB_BANNER_UNIT_ID }}
           ADMOB_INTERSTITIAL_UNIT_ID: ${{ secrets.ADMOB_INTERSTITIAL_UNIT_ID }}
           ADMOB_REWARDED_UNIT_ID: ${{ secrets.ADMOB_REWARDED_UNIT_ID }}
+          ANDROID_VERSION_CODE: ${{ steps.version.outputs.next_code }}
+          ANDROID_VERSION_NAME: ${{ steps.version.outputs.version_name }}
         run: gradle assembleRelease --no-daemon
-
-      - name: Commit version bump
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add app/build.gradle.kts
-          git commit -m "chore: bump version to ${{ steps.version.outputs.version_name }} (code ${{ steps.version.outputs.next_code }})"
-          git push
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version_name }}
-          name: AirGF v${{ steps.version.outputs.version_name }}
+          name: Amoura v${{ steps.version.outputs.version_name }}
           body: |
-            ## AirGF v${{ steps.version.outputs.version_name }}
+            ## Amoura v${{ steps.version.outputs.version_name }}
 
             **Version Code:** ${{ steps.version.outputs.next_code }}
 
