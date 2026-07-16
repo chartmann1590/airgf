@@ -31,9 +31,9 @@ BENEFITS = [
     "Remove all ads",
 ]
 DESCRIPTION = (
-    "Amoura Premium unlocks Spicy Mode permanently and removes all ads. "
-    "Prefer not to subscribe? You can also unlock Spicy Mode temporarily, "
-    "for free, by watching rewarded ads in Settings (up to 4 hours/day)."
+    "Unlocks Spicy Mode permanently and removes all ads. Prefer not to "
+    "subscribe? Watch rewarded ads in Settings to unlock Spicy Mode free "
+    "for up to 4 hours a day."
 )
 
 SCOPES = ["https://www.googleapis.com/auth/androidpublisher"]
