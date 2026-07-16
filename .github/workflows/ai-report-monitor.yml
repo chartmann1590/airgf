@@ -1,0 +1,127 @@
+name: AI Content Report Monitor
+
+on:
+  schedule:
+    - cron: '0 14 * * 1'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+env:
+  CF_ACCOUNT_ID: 'b9812477cf1517b4d2a626417564b48a'
+  CF_NAMESPACE_ID: '072588f166bb45dab05b4e6e9257456a'
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch reports from Cloudflare KV
+        id: fetch
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -e
+          KEYS=$(curl -s -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_NAMESPACE_ID}/keys?limit=1000")
+
+          if [ "$(echo "$KEYS" | jq -r '.success')" != "true" ]; then
+            echo "::error::Failed to list KV keys"
+            echo "$KEYS" | jq .
+            exit 1
+          fi
+
+          echo "$KEYS" | jq -c '.result[].name' > keys.txt
+          echo "Found $(wc -l < keys.txt) report(s) in KV"
+
+          echo "[]" > reports.json
+          while IFS= read -r raw_key; do
+            key=$(echo "$raw_key" | jq -r .)
+            value=$(curl -s -H "Authorization: Bearer ${CF_API_TOKEN}" \
+              "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_NAMESPACE_ID}/values/${key}")
+            entry=$(jq -n --arg id "$key" --argjson body "$(echo "$value" | jq -c . 2>/dev/null || echo '{}')" '{id: $id} + $body')
+            jq --argjson e "$entry" '. + [$e]' reports.json > reports.tmp.json && mv reports.tmp.json reports.json
+          done < keys.txt
+
+          cat reports.json | jq .
+
+      - name: Analyze and alert on trends
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const reports = JSON.parse(fs.readFileSync('reports.json', 'utf8'));
+            const { owner, repo } = context.repo;
+            const TRACKING_LABEL = 'ai-content-reports';
+
+            try { await github.rest.issues.getLabel({ owner, repo, name: TRACKING_LABEL }); }
+            catch { await github.rest.issues.createLabel({ owner, repo, name: TRACKING_LABEL, color: '5319e7', description: 'In-app AI response reports from users' }); }
+
+            const { data: openIssues } = await github.rest.issues.listForRepo({ owner, repo, labels: TRACKING_LABEL, state: 'open', per_page: 1 });
+            let tracker = openIssues[0];
+            const seenIds = new Set();
+            if (tracker) {
+              const match = (tracker.body || '').match(/<!-- seen-ids:(.*?) -->/s);
+              if (match) match[1].split(',').filter(Boolean).forEach(id => seenIds.add(id));
+            }
+
+            const newReports = reports.filter(r => r.id && !seenIds.has(r.id));
+            console.log(`${reports.length} total report(s) in KV, ${newReports.length} new since last check`);
+
+            if (newReports.length === 0) {
+              console.log('No new reports since last check — nothing to alert on.');
+              return;
+            }
+
+            const byReason = {};
+            for (const r of newReports) {
+              const reason = r.reason || 'Unspecified';
+              (byReason[reason] = byReason[reason] || []).push(r);
+            }
+
+            const trendLines = Object.entries(byReason)
+              .filter(([, list]) => list.length >= 3)
+              .map(([reason, list]) => `- ⚠️ **${list.length}x "${reason}"** in this batch — consider reviewing \`ContentSafetyPolicy.kt\` or the system prompt rules for this pattern.`);
+
+            const reportLines = newReports.map(r => {
+              const when = r.createdAt ? new Date(r.createdAt).toISOString() : 'unknown time';
+              const content = (r.content || '').slice(0, 400).replace(/\n/g, ' ');
+              const ctx = r.context ? (r.context || '').slice(0, 300).replace(/\n/g, ' ') : null;
+              return [
+                `### ${r.reason || 'Unspecified reason'} — ${when}`,
+                `> ${content}`,
+                ctx ? `\n**Context:**\n> ${ctx}` : '',
+                `\`${r.id}\``,
+              ].filter(Boolean).join('\n');
+            }).join('\n\n---\n\n');
+
+            const summary = [
+              `## 📋 ${newReports.length} new AI content report${newReports.length === 1 ? '' : 's'} this week`,
+              '',
+              trendLines.length ? `### Trends\n${trendLines.join('\n')}\n` : '',
+              `### Reports`,
+              reportLines,
+              '',
+              `*Full raw data (including any images) is only in Cloudflare KV — this issue mirrors text fields only. View at [dash.cloudflare.com](https://dash.cloudflare.com) → Workers & Pages → KV → REPORTS.*`,
+              '',
+              `<!-- seen-ids:${[...seenIds, ...newReports.map(r => r.id)].join(',')} -->`,
+            ].filter(l => l !== '').join('\n');
+
+            if (!tracker) {
+              const created = await github.rest.issues.create({
+                owner, repo,
+                title: '🚩 AI content reports',
+                body: summary,
+                labels: [TRACKING_LABEL],
+              });
+              console.log(`Created tracking issue #${created.data.number}`);
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: tracker.number, body: summary });
+              await github.rest.issues.update({
+                owner, repo, issue_number: tracker.number,
+                body: (tracker.body || '').replace(/<!-- seen-ids:.*? -->/s, `<!-- seen-ids:${[...seenIds, ...newReports.map(r => r.id)].join(',')} -->`),
+              });
+              console.log(`Commented on tracking issue #${tracker.number}`);
+            }
