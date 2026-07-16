@@ -77,7 +77,7 @@ Mode is gated behind a subscription or rewarded-ad credits:
 
 ## Download
 
-Grab the latest signed APK from [Releases](https://github.com/chartmann1590/airgf/releases/latest).
+Get it on [Google Play](https://play.google.com/store/apps/details?id=com.airgf.app), or grab the latest signed APK from [Releases](https://github.com/chartmann1590/airgf/releases/latest).
 
 ## Privacy
 

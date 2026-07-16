@@ -228,6 +228,21 @@
             display: block;
         }
 
+        /* PROMO VIDEO */
+        .promo-video {
+            display: flex;
+            justify-content: center;
+            padding: 0 0 80px;
+        }
+        .promo-video-player {
+            width: 100%;
+            max-width: 340px;
+            border-radius: 24px;
+            border: 2px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px var(--glow-purple);
+            display: block;
+        }
+
         /* FEATURES */
         .features {
             padding: 80px 0;
@@ -425,7 +440,7 @@
                 <a href="#features">Features</a>
                 <a href="https://github.com/chartmann1590/airgf">GitHub</a>
                 <a href="https://buymeacoffee.com/charleshartmann">Sponsor</a>
-                <a href="https://github.com/chartmann1590/airgf/releases/latest" class="btn-nav">Download</a>
+                <a href="https://play.google.com/store/apps/details?id=com.airgf.app" class="btn-nav">Get it on Google Play</a>
             </div>
         </div>
     </nav>
@@ -439,7 +454,11 @@
             <h1>Your AI girlfriend or boyfriend,<br><span class="gradient">entirely on your phone.</span></h1>
             <p>Amoura runs a full AI model on your phone. Conversations, memory, and your companion never leave your device. Free to use, with an optional subscription to go ad-free and unlock Spicy Mode.</p>
             <div class="hero-actions">
-                <a href="https://github.com/chartmann1590/airgf/releases/latest" class="btn btn-primary">
+                <a href="https://play.google.com/store/apps/details?id=com.airgf.app" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-17c0-.59.34-1.11.84-1.35l13.69 8.68-13.69 8.68c-.5-.24-.84-.76-.84-1.01zM17.53 10.83l2.71-1.72 3.22 2.05c.53.34.53 1.12 0 1.46l-3.22 2.05-2.71-1.72 1.13-1.06-1.13-1.06zM5.4 3.5l10.65 6.75-2.14 2.02L5.4 3.5zM5.4 20.5l8.51-8.77 2.14 2.02L5.4 20.5z"/></svg>
+                    Get it on Google Play
+                </a>
+                <a href="https://github.com/chartmann1590/airgf/releases/latest" class="btn btn-secondary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Download APK
                 </a>
@@ -461,6 +480,12 @@
                 <div class="screenshot-frame"><img src="screenshots/character.png" alt="3D character view" loading="lazy"></div>
                 <div class="screenshot-frame"><img src="screenshots/settings.png" alt="Settings and Spicy Mode" loading="lazy"></div>
             </div>
+        </section>
+
+        <section class="promo-video">
+            <video class="promo-video-player" controls playsinline preload="metadata" poster="screenshots/welcome.png">
+                <source src="amoura-promo.mp4" type="video/mp4">
+            </video>
         </section>
 
         <section class="features" id="features">
