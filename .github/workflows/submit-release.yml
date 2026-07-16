@@ -1,0 +1,30 @@
+name: Submit Play Store Release for Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "submit" to confirm sending the draft release to Google for review'
+        required: true
+        default: ''
+
+jobs:
+  submit:
+    if: ${{ github.event.inputs.confirm == 'submit' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Play Developer API client
+        run: pip install --quiet google-api-python-client google-auth
+
+      - name: Submit existing draft release for review
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: python play-store/scripts/submit_release.py
