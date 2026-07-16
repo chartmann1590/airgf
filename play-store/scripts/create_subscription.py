@@ -22,6 +22,8 @@ BASE_PLAN_ID = "amoura-premium-monthly"
 
 PRICE_USD_UNITS = 7
 PRICE_USD_NANOS = 990000000  # $7.99
+PRICE_EUR_UNITS = 7
+PRICE_EUR_NANOS = 490000000  # EUR7.49
 
 TITLE = "Amoura Premium"
 BENEFITS = [
@@ -83,11 +85,16 @@ def main():
                     }
                 ],
                 "otherRegionsConfig": {
-                    "otherRegionsNewSubscriberAvailability": True,
+                    "newSubscriberAvailability": True,
                     "usdPrice": {
                         "currencyCode": "USD",
                         "units": str(PRICE_USD_UNITS),
                         "nanos": PRICE_USD_NANOS,
+                    },
+                    "eurPrice": {
+                        "currencyCode": "EUR",
+                        "units": str(PRICE_EUR_UNITS),
+                        "nanos": PRICE_EUR_NANOS,
                     },
                 },
             }
@@ -104,7 +111,8 @@ def main():
         print(f"Creating subscription '{SUBSCRIPTION_ID}'...")
         created = subs.create(
             packageName=PACKAGE_NAME,
-            subscriptionId=SUBSCRIPTION_ID,
+            productId=SUBSCRIPTION_ID,
+            **{"regionsVersion.version": "2022/02"},
             body=body,
         ).execute()
         print(json.dumps(created, indent=2))
