@@ -112,7 +112,7 @@ def main():
         created = subs.create(
             packageName=PACKAGE_NAME,
             productId=SUBSCRIPTION_ID,
-            **{"regionsVersion.version": "2022/02"},
+            regionsVersion_version="2022/02",
             body=body,
         ).execute()
         print(json.dumps(created, indent=2))
