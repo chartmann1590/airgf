@@ -38,8 +38,16 @@ jobs:
           echo "[]" > reports.json
           while IFS= read -r raw_key; do
             key=$(echo "$raw_key" | jq -r .)
+            # Report keys are always written by the Worker as `${timestamp}-${uuid}`
+            # (see reporting-worker/src/index.js). Reject anything else before it
+            # touches a URL, rather than trusting the KV listing response as-is.
+            case "$key" in
+              [0-9]*-????????-????-????-????-????????????) ;;
+              *) echo "::warning::Skipping unexpected KV key format: $key"; continue ;;
+            esac
+            encoded_key=$(jq -rn --arg k "$key" '$k|@uri')
             value=$(curl -s -H "Authorization: Bearer ${CF_API_TOKEN}" \
-              "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_NAMESPACE_ID}/values/${key}")
+              "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_NAMESPACE_ID}/values/${encoded_key}")
             entry=$(jq -n --arg id "$key" --argjson body "$(echo "$value" | jq -c . 2>/dev/null || echo '{}')" '{id: $id} + $body')
             jq --argjson e "$entry" '. + [$e]' reports.json > reports.tmp.json && mv reports.tmp.json reports.json
           done < keys.txt
