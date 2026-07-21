@@ -11,12 +11,12 @@
 
 android {
     namespace = "com.airgf.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.airgf.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 5
         versionName = System.getenv("ANDROID_VERSION_NAME") ?: "1.0.4"
 
