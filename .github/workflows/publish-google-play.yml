@@ -125,6 +125,5 @@ jobs:
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: production
           status: draft
-          changesNotSentForReview: true
           whatsNewDirectory: distribution/whatsnew
           mappingFile: app/build/outputs/mapping/release/mapping.txt
