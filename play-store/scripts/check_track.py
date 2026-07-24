@@ -44,6 +44,10 @@ def main():
         names = [r.get("name") for r in t.get("releases", [])]
         print(f"TRACK track={t.get('track')!r} releaseNames={names!r}")
 
+    listings = edits.listings().list(packageName=PACKAGE_NAME, editId=edit_id).execute()
+    for l in listings.get("listings", []):
+        print(f"LISTING lang={l.get('language')!r} title={l.get('title')!r}")
+
     edits.delete(packageName=PACKAGE_NAME, editId=edit_id).execute()
 
 
