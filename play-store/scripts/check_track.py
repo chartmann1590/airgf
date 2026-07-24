@@ -33,6 +33,17 @@ def main():
     for r in releases:
         print(f"RELEASE name={r.get('name')!r} status={r.get('status')!r} versionCodes={r.get('versionCodes')!r}")
 
+    bundles = edits.bundles().list(packageName=PACKAGE_NAME, editId=edit_id).execute()
+    bundle_list = bundles.get("bundles", [])
+    print(f"BUNDLE_COUNT={len(bundle_list)}")
+    for b in bundle_list:
+        print(f"BUNDLE versionCode={b.get('versionCode')!r} sha256={b.get('sha256')!r}")
+
+    all_tracks = edits.tracks().list(packageName=PACKAGE_NAME, editId=edit_id).execute()
+    for t in all_tracks.get("tracks", []):
+        names = [r.get("name") for r in t.get("releases", [])]
+        print(f"TRACK track={t.get('track')!r} releaseNames={names!r}")
+
     edits.delete(packageName=PACKAGE_NAME, editId=edit_id).execute()
 
 
