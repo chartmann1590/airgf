@@ -22,61 +22,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val ghToken: String = run {
-            val propsFile = rootProject.file("local.properties")
-            if (!propsFile.exists()) {
-                System.getenv("GH_API_TOKEN") ?: ""
-            } else {
-                var token = System.getenv("GH_API_TOKEN") ?: ""
-                if (token.isEmpty()) {
-                    propsFile.forEachLine { line ->
-                        val trimmed = line.trim()
-                        if (trimmed.startsWith("github.api.token=")) {
-                            token = trimmed.removePrefix("github.api.token=").trim()
-                        }
-                    }
-                }
-                token
-            }
-        }
-        val ghOwner: String = run {
-            val propsFile = rootProject.file("local.properties")
-            if (!propsFile.exists()) {
-                System.getenv("GH_REPO_OWNER") ?: ""
-            } else {
-                var owner = System.getenv("GH_REPO_OWNER") ?: ""
-                if (owner.isEmpty()) {
-                    propsFile.forEachLine { line ->
-                        val trimmed = line.trim()
-                        if (trimmed.startsWith("github.repo.owner=")) {
-                            owner = trimmed.removePrefix("github.repo.owner=").trim()
-                        }
-                    }
-                }
-                owner
-            }
-        }
-        val ghRepo: String = run {
-            val propsFile = rootProject.file("local.properties")
-            if (!propsFile.exists()) {
-                System.getenv("GH_REPO_NAME") ?: ""
-            } else {
-                var repo = System.getenv("GH_REPO_NAME") ?: ""
-                if (repo.isEmpty()) {
-                    propsFile.forEachLine { line ->
-                        val trimmed = line.trim()
-                        if (trimmed.startsWith("github.repo.name=")) {
-                            repo = trimmed.removePrefix("github.repo.name=").trim()
-                        }
-                    }
-                }
-                repo
-            }
-        }
-        buildConfigField("String", "GITHUB_API_TOKEN", "\"$ghToken\"")
-        buildConfigField("String", "GITHUB_REPO_OWNER", "\"$ghOwner\"")
-        buildConfigField("String", "GITHUB_REPO_NAME", "\"$ghRepo\"")
-        buildConfigField("String", "FEEDBACK_ASSETS_DIR", "\"feedback-assets\"")
 
         fun resolveSecret(envKey: String, propsKey: String): String {
             val fromEnv = System.getenv(envKey) ?: ""
