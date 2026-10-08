@@ -15,6 +15,7 @@ import com.android.billingclient.api.ProductDetailsResponseListener
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryProductDetailsResult
 import com.android.billingclient.api.QueryPurchasesParams
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +46,7 @@ class SubscriptionRepositoryImpl @Inject constructor(
     private val billingClient: BillingClient = BillingClient.newBuilder(context)
         .setListener(this)
         .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+        .enableAutoServiceReconnection()
         .build()
 
     init {
@@ -81,10 +83,10 @@ class SubscriptionRepositoryImpl @Inject constructor(
             object : ProductDetailsResponseListener {
                 override fun onProductDetailsResponse(
                     result: BillingResult,
-                    productDetailsList: MutableList<ProductDetails>,
+                    queryResult: QueryProductDetailsResult,
                 ) {
                     if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                        _productDetails.value = productDetailsList.firstOrNull()
+                        _productDetails.value = queryResult.productDetailsList.firstOrNull()
                     }
                 }
             },
