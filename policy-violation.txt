@@ -1,0 +1,17 @@
+DO NOT REMOVE ANY ADS, JUST FIX THE PLACEMENT AND MAKE IT COMPLIANT! THEN COMMIT AND PUSH AND RUN THE PUBLISH TO PLAY STORE WORKFLOW AFTER YOU HAVE BUILT AND DEPLOY TO PIXEL 8 PRO AND VERIFIED ITS FIXED!
+
+Deceptive Ads policy: Violation of Deceptive Ads policy
+To make sure users have a positive experience on Google Play, we don’t allow apps that contain deceptive or disruptive ads. If an app contains ads that aren’t clearly labeled as ads or that simulate the user interface of any app feature, notifications, or OS warning elements, it violates our Deceptive Ads policy. For more information, watch Monetization and Ads video.
+
+Our review found that your app doesn’t appear to comply with this policy because it contains:
+Ads that aren’t clearly labeled.
+
+Where this issue was found
+This issue may also be found in other locations. Check all areas of your app when fixing this issue.
+
+Location
+Evidence
+In-app experience
+
+How to fix
+Remove any ads that violate the Deceptive Ads policy and address any other content in your app's store listing that doesn’t comply with this policy.
